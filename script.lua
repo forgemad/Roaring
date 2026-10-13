@@ -46,14 +46,15 @@ local function mk(txt,pos,sz,col,ap)
     return b
 end
 
-local bs=UDim2.new(0,85,0,85)
-local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-105),bs,Color3.fromRGB(80,0,120),Vector2.new(0,1))
-local bE=mk("SLASH",UDim2.new(0,110,1,-105),bs,Color3.fromRGB(120,0,60),Vector2.new(0,1))
-local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
-local bF=mk("ROAR",UDim2.new(0,110,1,-15),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
+-- ===== ЛЕВЫЕ КНОПКИ В СТОЛБИК У КРАЯ =====
+local bs=UDim2.new(0,70,0,70)
+local bQ=mk("Q\nРывок",UDim2.new(0,8,1,-8),bs,Color3.fromRGB(80,0,120),Vector2.new(0,1))
+local bE=mk("SLASH",UDim2.new(0,8,1,-83),bs,Color3.fromRGB(120,0,60),Vector2.new(0,1))
+local bR=mk("R\nКристалл",UDim2.new(0,8,1,-158),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
+local bF=mk("ROAR",UDim2.new(0,8,1,-233),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
+-- ===== ПРАВЫЕ КНОПКИ =====
 local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
 local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))
--- Кнопка настроек (перетаскиваемая)
 local bSet=Instance.new("TextButton")
 bSet.Size=UDim2.new(0,50,0,50) bSet.Position=UDim2.new(1,-70,0,15)
 bSet.BackgroundColor3=Color3.fromRGB(40,40,40) bSet.BackgroundTransparency=0.2
@@ -62,7 +63,6 @@ bSet.Font=Enum.Font.GothamBold bSet.Active=true bSet.Draggable=true bSet.Parent=
 Instance.new("UICorner",bSet).CornerRadius=UDim.new(1,0)
 local sst=Instance.new("UIStroke",bSet) sst.Color=Color3.fromRGB(150,0,255) sst.Thickness=2
 
--- Панель настроек
 local panel=Instance.new("Frame")
 panel.Size=UDim2.new(0,300,0,320)
 panel.Position=UDim2.new(0.5,-150,0.5,-160)
