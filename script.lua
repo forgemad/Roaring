@@ -11,113 +11,10 @@ if not char.Parent then char.AncestryChanged:Wait() end
 local hum=char:WaitForChild("Humanoid",10)
 local rp=char:WaitForChild("HumanoidRootPart",10)
 if not hum or not rp then return end
-for _,g in pairs(pg:GetChildren()) do if g.Name=="RoaringKnightUI" then g:Destroy() end end
+for _,g in pairs(pg:GetChildren()) do if g.Name=="RKUI" then g:Destroy() end end
 local gui=Instance.new("ScreenGui")
-gui.Name="RoaringKnightUI" gui.ResetOnSpawn=false gui.IgnoreGuiInset=true gui.Parent=pg
-pcall(function() hum.WalkSpeed=56 end)
-
-local idleT,walkT,slashT,dashT
-local function loadAnims()
-    pcall(function()
-        for _,t in pairs(hum:GetPlayingAnimationTracks()) do pcall(function() t:Stop() t:Destroy() end) end
-        local a=char:FindFirstChild("Animate") if a then a:Destroy() end
-        local a1=Instance.new("Animation") a1.AnimationId="rbxassetid://77003893779553"
-        idleT=hum:LoadAnimation(a1) idleT.Looped=true idleT.Priority=Enum.AnimationPriority.Idle idleT:Play()
-        local a2=Instance.new("Animation") a2.AnimationId="rbxassetid://70647917361899"
-        walkT=hum:LoadAnimation(a2) walkT.Looped=true walkT.Priority=Enum.AnimationPriority.Movement walkT:Play()
-        local a3=Instance.new("Animation") a3.AnimationId="rbxassetid://522635514"
-        slashT=hum:LoadAnimation(a3) slashT.Priority=Enum.AnimationPriority.Action
-        local a4=Instance.new("Animation") a4.AnimationId="rbxassetid://3333499562"
-        dashT=hum:LoadAnimation(a4) dashT.Priority=Enum.AnimationPriority.Action
-    end)
-end
-loadAnims()
-
-local function press(b,cb)
-    b.InputBegan:Connect(function(i)
-        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then pcall(cb) end
-    end)
-end
-
-local function mk(txt,pos,sz,col)
-    local b=Instance.new("TextButton")
-    b.Size=sz b.Position=pos
-    b.BackgroundColor3=col b.BackgroundTransparency=0.2
-    b.Text=txt b.TextColor3=Color3.new(1,1,1) b.TextScaled=true
-    b.Font=Enum.Font.GothamBold b.Parent=gui b.AutoButtonColor=true b.Active=true
-    Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)
-    local s=Instance.new("UIStroke",b) s.Color=Color3.fromRGB(150,0,255) s.Thickness=2
-    return b
-end
-
-local bs=UDim2.new(0,85,0,85)
-local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-105),bs,Color3.fromRGB(80,0,120))
-local bE=mk("SLASH",UDim2.new(0,105,1,-105),bs,Color3.fromRGB(120,0,60))
-local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,120))
-local bF=mk("ROAR",UDim2.new(0,105,1,-15),bs,Color3.fromRGB(80,0,140))
-local bP=mk("PLATFORM",UDim2.new(1,-105,1,-200),UDim2.new(0,85,0,85),Color3.fromRGB(80,0,120))
-local bD=mk("DESCEND",UDim2.new(1,-105,1,-110),UDim2.new(0,85,0,85),Color3.fromRGB(100,0,0))
-
-pcall(function()
-    local h=Instance.new("Highlight")
-    h.FillTransparency=1 h.OutlineColor=Color3.new(1,1,1)
-    h.OutlineTransparency=0 h.Parent=char
-end)
-pcall(function()
-    local h=Instance.new("Highlight")
-    h.FillTransparency=1 h.OutlineColor=Color3.new(0,0,0)
-    h.OutlineTransparency=0 h.Adornee=workspace h.Parent=gui
-end)
-
-pcall(function()
-    for _,p in pairs(char:GetChildren()) do
-        if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
-            p.BrickColor=BrickColor.new("Really black")
-            p.Material=Enum.Material.SmoothPlastic
-        end
-    end
-end)
-
-pcall(function()
-    for _,v in pairs(char:GetChildren()) do
-        if v.Name=="KnightSword" or v.Name=="KnightSwordAcc" then
-            pcall(function() v:Destroy() end)
-        end
-    end
-    local acc=Instance.new("Accessory")
-    acc.Name="KnightSwordAcc"
-    local handle=Instance.new("Part")
-    handle.Name="Handle" handle.Size=Vector3.new(0.4,0.4,7)
-    handle.BrickColor=BrickColor.new("Really black")
-    handle.Material=Enum.Material.Neon
-    handle.Color=Color3.fromRGB(80,0,120)
-    handle.CanCollide=false handle.Massless=true handle.Parent=acc
-    local grip=Instance.new("Attachment")
-    grip.Name="RightGripAttachment"
-    grip.Position=Vector3.new(0,0,-3.5)
-    grip.Parent=handle
-    local ok=pcall(function() hum:AddAccessory(acc) end)
-    if not ok then
-        local sw=Instance.new("Part")
-        sw.Name="KnightSword" sw.Size=Vector3.new(0.35,0.35,7)
-        sw.BrickColor=BrickColor.new("Really black")
-        sw.Material=Enum.Material.Neon
-        sw.Color=Color3.fromRGB(80,0,120)
-        sw.CanCollide=false sw.Massless=true sw.Parent=char
-        local rh=char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm") or rp
-        local w=Instance.new("Weld")
-        w.Part0=rh w.Part1=sw
-        w.C0=CFrame.new(0,-0.5,-3.5)
-        w.Parent=sw
-    end
-end)
-
-pcall(function()
-    local roar=Instance.new("Sound")
-    roar.SoundId="rbxassetid://72750019250769"
-    roar.Volume=0.4 roar.Looped=true roar.PlaybackSpeed=0.1
-    roar.Parent=rp roar:Play()
-end)local dA1=Instance.new("Attachment") dA1.Position=Vector3.new(0,-1.5,0) dA1.Parent=rp
+gui.Name="RKUI" gui.ResetOnSpawn=false gui.IgnoreGuiInset=true gui.Parent=pg
+pcall(function() hum.WalkSpeed=56 end)local dA1=Instance.new("Attachment") dA1.Position=Vector3.new(0,-1.5,0) dA1.Parent=rp
 local dA2=Instance.new("Attachment") dA2.Position=Vector3.new(0,1.5,0) dA2.Parent=rp
 local dTrail=Instance.new("Trail")
 dTrail.Attachment0=dA1 dTrail.Attachment1=dA2
@@ -262,7 +159,110 @@ if not char.Parent then char.AncestryChanged:Wait() end
 local hum=char:WaitForChild("Humanoid",10)
 local rp=char:WaitForChild("HumanoidRootPart",10)
 if not hum or not rp then return end
-for _,g in pairs(pg:GetChildren()) do if g.Name=="RKUI" then g:Destroy() end end
+for _,g in pairs(pg:GetChildren()) do if g.Name=="RoaringKnightUI" then g:Destroy() end end
 local gui=Instance.new("ScreenGui")
-gui.Name="RKUI" gui.ResetOnSpawn=false gui.IgnoreGuiInset=true gui.Parent=pg
+gui.Name="RoaringKnightUI" gui.ResetOnSpawn=false gui.IgnoreGuiInset=true gui.Parent=pg
 pcall(function() hum.WalkSpeed=56 end)
+
+local idleT,walkT,slashT,dashT
+local function loadAnims()
+    pcall(function()
+        for _,t in pairs(hum:GetPlayingAnimationTracks()) do pcall(function() t:Stop() t:Destroy() end) end
+        local a=char:FindFirstChild("Animate") if a then a:Destroy() end
+        local a1=Instance.new("Animation") a1.AnimationId="rbxassetid://77003893779553"
+        idleT=hum:LoadAnimation(a1) idleT.Looped=true idleT.Priority=Enum.AnimationPriority.Idle idleT:Play()
+        local a2=Instance.new("Animation") a2.AnimationId="rbxassetid://70647917361899"
+        walkT=hum:LoadAnimation(a2) walkT.Looped=true walkT.Priority=Enum.AnimationPriority.Movement walkT:Play()
+        local a3=Instance.new("Animation") a3.AnimationId="rbxassetid://522635514"
+        slashT=hum:LoadAnimation(a3) slashT.Priority=Enum.AnimationPriority.Action
+        local a4=Instance.new("Animation") a4.AnimationId="rbxassetid://3333499562"
+        dashT=hum:LoadAnimation(a4) dashT.Priority=Enum.AnimationPriority.Action
+    end)
+end
+loadAnims()
+
+local function press(b,cb)
+    b.InputBegan:Connect(function(i)
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then pcall(cb) end
+    end)
+end
+
+local function mk(txt,pos,sz,col)
+    local b=Instance.new("TextButton")
+    b.Size=sz b.Position=pos
+    b.BackgroundColor3=col b.BackgroundTransparency=0.2
+    b.Text=txt b.TextColor3=Color3.new(1,1,1) b.TextScaled=true
+    b.Font=Enum.Font.GothamBold b.Parent=gui b.AutoButtonColor=true b.Active=true
+    Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)
+    local s=Instance.new("UIStroke",b) s.Color=Color3.fromRGB(150,0,255) s.Thickness=2
+    return b
+end
+
+local bs=UDim2.new(0,85,0,85)
+local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-105),bs,Color3.fromRGB(80,0,120))
+local bE=mk("SLASH",UDim2.new(0,105,1,-105),bs,Color3.fromRGB(120,0,60))
+local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,120))
+local bF=mk("ROAR",UDim2.new(0,105,1,-15),bs,Color3.fromRGB(80,0,140))
+local bP=mk("PLATFORM",UDim2.new(1,-105,1,-200),UDim2.new(0,85,0,85),Color3.fromRGB(80,0,120))
+local bD=mk("DESCEND",UDim2.new(1,-105,1,-110),UDim2.new(0,85,0,85),Color3.fromRGB(100,0,0))
+
+pcall(function()
+    local h=Instance.new("Highlight")
+    h.FillTransparency=1 h.OutlineColor=Color3.new(1,1,1)
+    h.OutlineTransparency=0 h.Parent=char
+end)
+pcall(function()
+    local h=Instance.new("Highlight")
+    h.FillTransparency=1 h.OutlineColor=Color3.new(0,0,0)
+    h.OutlineTransparency=0 h.Adornee=workspace h.Parent=gui
+end)
+
+pcall(function()
+    for _,p in pairs(char:GetChildren()) do
+        if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
+            p.BrickColor=BrickColor.new("Really black")
+            p.Material=Enum.Material.SmoothPlastic
+        end
+    end
+end)
+
+pcall(function()
+    for _,v in pairs(char:GetChildren()) do
+        if v.Name=="KnightSword" or v.Name=="KnightSwordAcc" then
+            pcall(function() v:Destroy() end)
+        end
+    end
+    local acc=Instance.new("Accessory")
+    acc.Name="KnightSwordAcc"
+    local handle=Instance.new("Part")
+    handle.Name="Handle" handle.Size=Vector3.new(0.4,0.4,7)
+    handle.BrickColor=BrickColor.new("Really black")
+    handle.Material=Enum.Material.Neon
+    handle.Color=Color3.fromRGB(80,0,120)
+    handle.CanCollide=false handle.Massless=true handle.Parent=acc
+    local grip=Instance.new("Attachment")
+    grip.Name="RightGripAttachment"
+    grip.Position=Vector3.new(0,0,-3.5)
+    grip.Parent=handle
+    local ok=pcall(function() hum:AddAccessory(acc) end)
+    if not ok then
+        local sw=Instance.new("Part")
+        sw.Name="KnightSword" sw.Size=Vector3.new(0.35,0.35,7)
+        sw.BrickColor=BrickColor.new("Really black")
+        sw.Material=Enum.Material.Neon
+        sw.Color=Color3.fromRGB(80,0,120)
+        sw.CanCollide=false sw.Massless=true sw.Parent=char
+        local rh=char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm") or rp
+        local w=Instance.new("Weld")
+        w.Part0=rh w.Part1=sw
+        w.C0=CFrame.new(0,-0.5,-3.5)
+        w.Parent=sw
+    end
+end)
+
+pcall(function()
+    local roar=Instance.new("Sound")
+    roar.SoundId="rbxassetid://72750019250769"
+    roar.Volume=0.4 roar.Looped=true roar.PlaybackSpeed=0.1
+    roar.Parent=rp roar:Play()
+end)
