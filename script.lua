@@ -35,11 +35,8 @@ loadAnims()
 
 local function press(b,cb)
     b.InputBegan:Connect(function(i)
-        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-            cb()
-        end
+        if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then pcall(cb) end
     end)
-    b.MouseButton1Click:Connect(function() pcall(cb) end)
 end
 
 local function mk(txt,pos,sz,col)
@@ -51,61 +48,15 @@ local function mk(txt,pos,sz,col)
     Instance.new("UICorner",b).CornerRadius=UDim.new(1,0)
     local s=Instance.new("UIStroke",b) s.Color=Color3.fromRGB(150,0,255) s.Thickness=2
     return b
-endlocal bP=mk("PLATFORM",UDim2.new(1,-105,1,-200),UDim2.new(0,85,0,85),Color3.fromRGB(80,0,120))
+end
+
+local bs=UDim2.new(0,85,0,85)
+local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-105),bs,Color3.fromRGB(80,0,120))
+local bE=mk("SLASH",UDim2.new(0,105,1,-105),bs,Color3.fromRGB(120,0,60))
+local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,120))
+local bF=mk("ROAR",UDim2.new(0,105,1,-15),bs,Color3.fromRGB(80,0,140))
+local bP=mk("PLATFORM",UDim2.new(1,-105,1,-200),UDim2.new(0,85,0,85),Color3.fromRGB(80,0,120))
 local bD=mk("DESCEND",UDim2.new(1,-105,1,-110),UDim2.new(0,85,0,85),Color3.fromRGB(100,0,0))
-
-local bSet=Instance.new("TextButton")
-bSet.Size=UDim2.new(0,55,0,55) bSet.Position=UDim2.new(1,-75,0,15)
-bSet.BackgroundColor3=Color3.fromRGB(40,40,40) bSet.BackgroundTransparency=0.2
-bSet.Text="⚙" bSet.TextColor3=Color3.new(1,1,1) bSet.TextScaled=true
-bSet.Font=Enum.Font.GothamBold bSet.Active=true bSet.Draggable=true bSet.Parent=gui
-Instance.new("UICorner",bSet).CornerRadius=UDim.new(1,0)
-
-local panel=Instance.new("Frame")
-panel.Size=UDim2.new(0,300,0,320) panel.Position=UDim2.new(0.5,-150,0.5,-160)
-panel.BackgroundColor3=Color3.fromRGB(25,15,40) panel.BackgroundTransparency=0.1
-panel.Visible=false panel.Active=true panel.Draggable=true panel.Parent=gui
-Instance.new("UICorner",panel).CornerRadius=UDim.new(0,12)
-
-local title=Instance.new("TextLabel",panel)
-title.Size=UDim2.new(1,0,0,35) title.BackgroundColor3=Color3.fromRGB(50,20,80)
-title.Text="⚙ НАСТРОЙКИ" title.TextColor3=Color3.new(1,1,1)
-title.TextScaled=true title.Font=Enum.Font.GothamBold
-Instance.new("UICorner",title).CornerRadius=UDim.new(0,12)
-
-local btnClose=Instance.new("TextButton",panel)
-btnClose.Size=UDim2.new(0,28,0,28) btnClose.Position=UDim2.new(1,-33,0,4)
-btnClose.BackgroundColor3=Color3.fromRGB(150,0,0) btnClose.Text="✕"
-btnClose.TextColor3=Color3.new(1,1,1) btnClose.TextScaled=true btnClose.Font=Enum.Font.GothamBold
-
-local btnRA=Instance.new("TextButton",panel)
-btnRA.Size=UDim2.new(0,260,0,45) btnRA.Position=UDim2.new(0,20,0,45)
-btnRA.BackgroundColor3=Color3.fromRGB(80,0,120) btnRA.Text="↻  СБРОС АНИМАЦИЙ"
-btnRA.TextColor3=Color3.new(1,1,1) btnRA.TextScaled=true btnRA.Font=Enum.Font.GothamBold
-
-local btnRS=Instance.new("TextButton",panel)
-btnRS.Size=UDim2.new(0,260,0,45) btnRS.Position=UDim2.new(0,20,0,100)
-btnRS.BackgroundColor3=Color3.fromRGB(120,0,60) btnRS.Text="↺  СБРОС НАСТРОЕК"
-btnRS.TextColor3=Color3.new(1,1,1) btnRS.TextScaled=true btnRS.Font=Enum.Font.GothamBold
-
-local help=Instance.new("TextLabel",panel)
-help.Size=UDim2.new(1,-20,0,155) help.Position=UDim2.new(0,10,0,160)
-help.BackgroundTransparency=1 help.TextColor3=Color3.fromRGB(230,220,255)
-help.TextXAlignment=Enum.TextXAlignment.Left help.TextYAlignment=Enum.TextYAlignment.Top
-help.TextSize=13 help.Font=Enum.Font.Gotham help.TextWrapped=true
-help.Text="УПРАВЛЕНИЕ:\nQ — Рывок (70 studs)\nSLASH — 25 урона\nR — 15 кристаллов\nROAR — зажми и отпусти\nPLATFORM — площадка\nDESCEND — зажми спуск"
-
-press(bSet,function() panel.Visible=not panel.Visible end)
-press(btnClose,function() panel.Visible=false end)
-press(btnRA,function() loadAnims() end)
-press(btnRS,function()
-    pcall(function()
-        hum.WalkSpeed=16 task.wait(0.1) hum.WalkSpeed=56
-        local sp=workspace:FindFirstChildOfClass("SpawnLocation")
-        if sp then rp.CFrame=CFrame.new(sp.Position+Vector3.new(0,5,0)) end
-        loadAnims()
-    end)
-end)
 
 pcall(function()
     local h=Instance.new("Highlight")
@@ -116,11 +67,9 @@ pcall(function()
     local h=Instance.new("Highlight")
     h.FillTransparency=1 h.OutlineColor=Color3.new(0,0,0)
     h.OutlineTransparency=0 h.Adornee=workspace h.Parent=gui
-end)local bs=UDim2.new(0,90,0,90)
-local bQ=mk("Q\nРывок",UDim2.new(0,20,1,-20),bs,Color3.fromRGB(80,0,120))
-local bE=mk("SLASH",UDim2.new(0,20,1,-120),bs,Color3.fromRGB(120,0,60))
-local bR=mk("R\nКристалл",UDim2.new(0,20,1,-220),bs,Color3.fromRGB(60,0,120))
-local bF=mk("ROAR",UDim2.new(0,20,1,-320),bs,Color3.fromRGB(80,0,140))pcall(function()
+end)
+
+pcall(function()
     for _,p in pairs(char:GetChildren()) do
         if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
             p.BrickColor=BrickColor.new("Really black")
@@ -157,49 +106,26 @@ pcall(function()
         sw.CanCollide=false sw.Massless=true sw.Parent=char
         local rh=char:FindFirstChild("RightHand") or char:FindFirstChild("Right Arm") or rp
         local w=Instance.new("Weld")
-        w.Part0=rh w.Part1=sw w.C0=CFrame.new(0,-0.5,-3.5) w.Parent=sw
+        w.Part0=rh w.Part1=sw
+        w.C0=CFrame.new(0,-0.5,-3.5)
+        w.Parent=sw
     end
 end)
 
 pcall(function()
     local roar=Instance.new("Sound")
-    roar.Name="KnightRoarSound"
     roar.SoundId="rbxassetid://72750019250769"
     roar.Volume=0.4 roar.Looped=true roar.PlaybackSpeed=0.1
     roar.Parent=rp roar:Play()
-end)
-
--- Чёрный след при рывке
-local dA1=Instance.new("Attachment") dA1.Position=Vector3.new(0,-1.5,0) dA1.Parent=rp
+end)local dA1=Instance.new("Attachment") dA1.Position=Vector3.new(0,-1.5,0) dA1.Parent=rp
 local dA2=Instance.new("Attachment") dA2.Position=Vector3.new(0,1.5,0) dA2.Parent=rp
 local dTrail=Instance.new("Trail")
 dTrail.Attachment0=dA1 dTrail.Attachment1=dA2
-dTrail.Color=ColorSequence.new({
-    ColorSequenceKeypoint.new(0,Color3.new(0,0,0)),
-    ColorSequenceKeypoint.new(0.5,Color3.fromRGB(30,0,50)),
-    ColorSequenceKeypoint.new(1,Color3.new(0,0,0))
-})
-dTrail.Transparency=NumberSequence.new({
-    NumberSequenceKeypoint.new(0,0.1),
-    NumberSequenceKeypoint.new(1,1)
-})
-dTrail.Lifetime=0.7 dTrail.LightEmission=0 dTrail.Enabled=false
-dTrail.Parent=rp
+dTrail.Color=ColorSequence.new(Color3.new(0,0,0))
+dTrail.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.1),NumberSequenceKeypoint.new(1,1)})
+dTrail.Lifetime=0.7 dTrail.Enabled=false dTrail.Parent=rp
 
-local dSmoke=Instance.new("ParticleEmitter")
-dSmoke.Texture="rbxassetid://243660364"
-dSmoke.Rate=0 dSmoke.Lifetime=NumberRange.new(0.6,1.2)
-dSmoke.Speed=NumberRange.new(2,5)
-dSmoke.Size=NumberSequence.new({
-    NumberSequenceKeypoint.new(0,0.5),
-    NumberSequenceKeypoint.new(1,3)
-})
-dSmoke.Transparency=NumberSequence.new({
-    NumberSequenceKeypoint.new(0,0.3),
-    NumberSequenceKeypoint.new(1,1)
-})
-dSmoke.Color=ColorSequence.new(Color3.new(0,0,0))
-dSmoke.Parent=rpUIS.JumpRequest:Connect(function()
+UIS.JumpRequest:Connect(function()
     pcall(function() hum:ChangeState(Enum.HumanoidStateType.Jumping) hum.Jump=true end)
 end)
 task.spawn(function()
@@ -238,7 +164,6 @@ local function dmg(ts,d,kb,o,fk)
             if fk then
                 pcall(function() t.h:TakeDamage(t.h.MaxHealth*10) end)
                 pcall(function() t.h.Health=0 end)
-                pcall(function() t.h:ChangeState(Enum.HumanoidStateType.Dead) end)
                 task.spawn(function()
                     for i=1,5 do
                         task.wait(0.05)
@@ -293,7 +218,6 @@ local function dash()
         task.delay(0.4,function() if dashT then pcall(function() dashT:Stop(0.1) end) end end)
     end
     pcall(function() dTrail.Enabled=true end)
-    pcall(function() dSmoke:Emit(30) end)
     local d=dir() local sp=rp.Position local tp=sp+d*70
     local wa=rp.Anchored
     pcall(function() rp.Anchored=true end)
@@ -311,7 +235,6 @@ local function dash()
         local e=1-(1-a)*(1-a)
         local np=sp:Lerp(tp,e)
         rp.CFrame=CFrame.new(np,np+d)
-        if math.random()<0.3 then pcall(function() dSmoke:Emit(5) end) end
         if a>=1 then
             if conn then conn:Disconnect() end
             pcall(function() rp.Anchored=wa end)
@@ -326,35 +249,20 @@ local function dash()
             dmg(targets(rp.Position,6),9999,0,rp.Position,true)
         end
     end)
-end
-
-local lastS=0
-local function slash()
-    if tick()-lastS<1.5 then return end
-    lastS=tick()
-    if slashT then
-        pcall(function() slashT:Play(0.1) end)
-        task.delay(0.6,function() if slashT then pcall(function() slashT:Stop(0.1) end) end end)
-    end
-    local d=dir() local o=rp.Position+d*3 local c=o+d*20
-    local beam=Instance.new("Part")
-    beam.Size=Vector3.new(4,4,40) beam.CFrame=CFrame.new(c,c+d)
-    beam.Material=Enum.Material.SmoothPlastic beam.Color=Color3.fromRGB(0,0,0)
-    beam.BrickColor=BrickColor.new("Really black") beam.Anchored=true beam.CanCollide=false beam.Parent=workspace
-    local out=Instance.new("Part")
-    out.Size=Vector3.new(4.6,4.6,40) out.CFrame=beam.CFrame
-    out.Material=Enum.Material.Neon out.Color=Color3.fromRGB(80,0,120) out.Transparency=0.4
-    out.Anchored=true out.CanCollide=false out.Parent=beam
-    D:AddItem(beam,0.5)
-    pcall(function()
-        local s=Instance.new("Sound")
-        s.SoundId="rbxassetid://9125402735" s.Volume=1.2 s.PlaybackSpeed=0.9
-        s.Parent=rp s:Play() D:AddItem(s,2)
-    end)
-    local ht={} local hs={}
-    for i=1,10 do
-        local pt=o+d*(40*i/10)
-        for _,t in pairs(targets(pt,7)) do if not hs[t.h] then hs[t.h]=true table.insert(ht,t) end end
-    end
-    dmg(ht,25,80,o,false)
-end
+endlocal P=game:GetService("Players")
+local RS=game:GetService("RunService")
+local UIS=game:GetService("UserInputService")
+local D=game:GetService("Debris")
+local T=game:GetService("TweenService")
+local plr=P.LocalPlayer
+local pg=plr:WaitForChild("PlayerGui",5)
+if not pg then return end
+local char=plr.Character or plr.CharacterAdded:Wait()
+if not char.Parent then char.AncestryChanged:Wait() end
+local hum=char:WaitForChild("Humanoid",10)
+local rp=char:WaitForChild("HumanoidRootPart",10)
+if not hum or not rp then return end
+for _,g in pairs(pg:GetChildren()) do if g.Name=="RKUI" then g:Destroy() end end
+local gui=Instance.new("ScreenGui")
+gui.Name="RKUI" gui.ResetOnSpawn=false gui.IgnoreGuiInset=true gui.Parent=pg
+pcall(function() hum.WalkSpeed=56 end)
