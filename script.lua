@@ -583,6 +583,7 @@ local ballActive=false
 local ballPart=nil
 local ballWeld=nil
 local ballSpin=nil
+local ballVel=nil
 local savedSpeed=56
 local function activateBall()
 if ballActive then return end
@@ -591,14 +592,15 @@ savedSpeed=hum.WalkSpeed
 hum.WalkSpeed=savedSpeed*2
 hum.JumpPower=0
 hum.JumpHeight=0
+hum.PlatformStand=true
 for _,p in pairs(char:GetChildren()) do
 if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
 pcall(function() p.Transparency=1 end)
 pcall(function() p.CanCollide=false end)
 end
 end
-for _,v in pairs(char:GetChildren()) do
-if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") then
+for _,v in pairs(char:GetDescendants()) do
+if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Decal") then
 pcall(function() v.Transparency=1 end)
 end
 end
@@ -618,6 +620,11 @@ ballWeld.Part1=ballPart
 ballWeld.C0=CFrame.new(0,0,0)
 ballWeld.Parent=ballPart
 T:Create(ballPart,TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=Vector3.new(2.5,2.5,2.5)}):Play()
+ballVel=Instance.new("BodyVelocity")
+ballVel.MaxForce=Vector3.new(1e6,1e6,1e6)
+ballVel.P=1e5
+ballVel.Velocity=Vector3.new(0,0,0)
+ballVel.Parent=rp
 local att=Instance.new("Attachment")
 att.Parent=ballPart
 local pe=Instance.new("ParticleEmitter")
@@ -634,9 +641,27 @@ pe.Color=ColorSequence.new(Color3.fromRGB(200,100,255))
 pe.LightEmission=1
 pe.Parent=att
 ballSpin=RS.RenderStepped:Connect(function(dt)
-if ballPart and ballPart.Parent then
+if not ballPart or not ballPart.Parent then return end
 ballPart.CFrame=ballPart.CFrame*CFrame.Angles(dt*10,dt*7,dt*5)
+local flyUp=UIS:IsKeyDown(Enum.KeyCode.Space) or UIS:IsKeyDown(Enum.KeyCode.W)
+local descDown=UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.S)
+local mv=UIS:GetMoveVector()
+local dirs=workspace.CurrentCamera.CFrame
+local fwd=Vector3.new(dirs.LookVector.X,0,dirs.LookVector.Z)
+if fwd.Magnitude>0.001 then fwd=fwd.Unit end
+local rgt=Vector3.new(dirs.RightVector.X,0,dirs.RightVector.Z)
+if rgt.Magnitude>0.001 then rgt=rgt.Unit end
+local moveDir=Vector3.new(0,0,0)
+if mv.Magnitude>0.1 then
+if mv.Z<-0.1 then moveDir=moveDir+fwd end
+if mv.Z>0.1 then moveDir=moveDir-fwd end
+if mv.X<-0.1 then moveDir=moveDir-rgt end
+if mv.X>0.1 then moveDir=moveDir+rgt end
 end
+local v=moveDir.Unit*80
+if flyUp then v=v+Vector3.new(0,60,0) end
+if descDown then v=v+Vector3.new(0,-120,0) end
+ballVel.Velocity=v
 end)
 end
 local function deactivateBall()
@@ -644,6 +669,7 @@ if not ballActive then return end
 ballActive=false
 if ballSpin then ballSpin:Disconnect() ballSpin=nil end
 if ballWeld then ballWeld:Destroy() ballWeld=nil end
+if ballVel then ballVel:Destroy() ballVel=nil end
 if ballPart then ballPart.Parent=nil ballPart:Destroy() ballPart=nil end
 for _,p in pairs(char:GetChildren()) do
 if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
@@ -651,11 +677,12 @@ pcall(function() p.Transparency=0 end)
 pcall(function() p.CanCollide=true end)
 end
 end
-for _,v in pairs(char:GetChildren()) do
-if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") then
+for _,v in pairs(char:GetDescendants()) do
+if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Decal") then
 pcall(function() v.Transparency=0 end)
 end
 end
+hum.PlatformStand=false
 hum.WalkSpeed=savedSpeed
 hum.JumpPower=50
 hum.JumpHeight=7.2
@@ -672,6 +699,17 @@ bB.BackgroundColor3=Color3.fromRGB(200,0,0)
 else
 bB.Text="BALL"
 bB.BackgroundColor3=Color3.fromRGB(150,0,200)
+end
+end)
+local ballDescend=false
+bD.InputBegan:Connect(function(i)
+if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+if ballActive then ballDescend=true end
+end
+end)
+bD.InputEnded:Connect(function(i)
+if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+if ballActive then ballDescend=false end
 end
 end)
 UIS.InputBegan:Connect(function(i,gp)
