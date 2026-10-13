@@ -84,7 +84,8 @@ local bE=mk("SLASH",UDim2.new(0,105,1,-105),bs,Color3.fromRGB(120,0,60),Vector2.
 local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
 local bF=mk("ROAR",UDim2.new(0,105,1,-15),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
 local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
-local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))pcall(function()
+local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))
+pcall(function()
 local h=Instance.new("Highlight")
 h.FillTransparency=1
 h.OutlineColor=Color3.new(1,1,1)
@@ -109,7 +110,6 @@ end
 end)
 pcall(function()
 local acc=Instance.new("Accessory")
-acc.Name="KnightSwordAcc"
 local handle=Instance.new("Part")
 handle.Name="Handle"
 handle.Size=Vector3.new(0.4,0.4,7)
@@ -124,9 +124,7 @@ grip.Name="RightGripAttachment"
 grip.Position=Vector3.new(0,0,-3.5)
 grip.Parent=handle
 local ok=pcall(function() hum:AddAccessory(acc) end)
-if not ok then
-acc:Destroy()
-end
+if not ok then acc:Destroy() end
 end)
 pcall(function()
 local roar=Instance.new("Sound")
@@ -136,8 +134,7 @@ roar.Looped=true
 roar.PlaybackSpeed=0.1
 roar.Parent=rp
 roar:Play()
-end)
-local dA1=Instance.new("Attachment")
+end)local dA1=Instance.new("Attachment")
 dA1.Position=Vector3.new(0,-1.5,0)
 dA1.Parent=rp
 local dA2=Instance.new("Attachment")
@@ -175,112 +172,6 @@ end
 end
 end
 end)
-local lastS=0
-local function slash()
-if tick()-lastS<1.5 then return end
-lastS=tick()
-if slashT then
-pcall(function() slashT:Play(0.1) end)
-task.delay(0.6,function() if slashT then pcall(function() slashT:Stop(0.1) end) end end)
-end
-local d=dir()
-local o=rp.Position+d*3
-local c=o+d*20
-local beam=Instance.new("Part")
-beam.Size=Vector3.new(4,4,40)
-beam.CFrame=CFrame.new(c,c+d)
-beam.Material=Enum.Material.SmoothPlastic
-beam.Color=Color3.fromRGB(0,0,0)
-beam.Anchored=true
-beam.CanCollide=false
-beam.Parent=workspace
-local out=Instance.new("Part")
-out.Size=Vector3.new(4.6,4.6,40)
-out.CFrame=beam.CFrame
-out.Material=Enum.Material.Neon
-out.Color=Color3.fromRGB(80,0,120)
-out.Transparency=0.4
-out.Anchored=true
-out.CanCollide=false
-out.Parent=beam
-D:AddItem(beam,0.5)
-pcall(function()
-local s=Instance.new("Sound")
-s.SoundId="rbxassetid://9125402735"
-s.Volume=1.2
-s.PlaybackSpeed=0.9
-s.Parent=rp
-s:Play()
-D:AddItem(s,2)
-end)
-local ht={}
-local hs={}
-for i=1,10 do
-local pt=o+d*(40*i/10)
-for _,t in pairs(targets(pt,7)) do
-if not hs[t.h] then
-hs[t.h]=true
-table.insert(ht,t)
-end
-end
-end
-dmg(ht,25,80,o,false)
-end
-local cBusy=false
-local function crystal()
-if cBusy then return end
-cBusy=true
-for i=1,15 do
-task.spawn(function()
-local c=Instance.new("Part")
-c.Size=Vector3.new(2.5,2.5,0.1)
-c.Transparency=1
-c.CanCollide=false
-c.Anchored=true
-c.Parent=workspace
-local s1=Instance.new("Decal")
-s1.Texture="rbxassetid://6031075931"
-s1.Face=Enum.NormalId.Front
-s1.Parent=c
-local s2=Instance.new("Decal")
-s2.Texture="rbxassetid://6031075931"
-s2.Face=Enum.NormalId.Back
-s2.Parent=c
-c.CFrame=rp.CFrame*CFrame.new(math.random(-3,3),math.random(0,5),math.random(-2,2)-3)
-c.Anchored=false
-local bv=Instance.new("BodyVelocity")
-local sd=(workspace.CurrentCamera.CFrame.LookVector+Vector3.new(math.random(-15,15)/100,math.random(-10,10)/100,0)).Unit
-bv.Velocity=sd*(70+math.random(0,30))
-bv.MaxForce=Vector3.new(1e6,1e6,1e6)
-bv.Parent=c
-local al=Instance.new("BodyGyro")
-al.MaxTorque=Vector3.new(1e6,1e6,1e6)
-al.P=1e5
-al.Parent=c
-local cn
-cn=RS.RenderStepped:Connect(function()
-if not c or not c.Parent then
-if cn then cn:Disconnect() end
-return
-end
-local cam=workspace.CurrentCamera
-if cam then al.CFrame=CFrame.new(c.Position,c.Position+cam.CFrame.LookVector) end
-end)
-c.Touched:Connect(function(hit)
-local h=hit.Parent:FindFirstChildOfClass("Humanoid")
-if h and h.Health>0 and hit.Parent~=char then
-h:TakeDamage(5)
-if cn then cn:Disconnect() end
-c:Destroy()
-end
-end)
-D:AddItem(c,2)
-end)
-task.wait(0.05)
-end
-task.wait(0.1)
-cBusy=false
-end
 local function targets(o,r)
 local t={}
 for _,p in pairs(P:GetPlayers()) do
@@ -393,6 +284,138 @@ if not rp or not rp.Parent then return end
 dmg(targets(rp.Position,6),9999,0,rp.Position,true)
 end
 end)
+end
+local lastS=0
+local function slash()
+if tick()-lastS<1.5 then return end
+lastS=tick()
+if slashT then
+pcall(function() slashT:Play(0.1) end)
+task.delay(0.6,function() if slashT then pcall(function() slashT:Stop(0.1) end) end end)
+end
+local d=dir()
+local o=rp.Position+d*8
+local c=o+d*20
+local beam=Instance.new("Part")
+beam.Name="KnightSlash"
+beam.Size=Vector3.new(5,5,40)
+beam.CFrame=CFrame.new(c,c+d)
+beam.Material=Enum.Material.Neon
+beam.Color=Color3.fromRGB(80,0,140)
+beam.Transparency=0.15
+beam.Anchored=true
+beam.CanCollide=false
+beam.CastShadow=false
+beam.Parent=workspace
+local core=Instance.new("Part")
+core.Name="KnightSlashCore"
+core.Size=Vector3.new(2,2,40)
+core.CFrame=beam.CFrame
+core.Material=Enum.Material.Neon
+core.Color=Color3.fromRGB(255,255,255)
+core.Transparency=0.1
+core.Anchored=true
+core.CanCollide=false
+core.CastShadow=false
+core.Parent=workspace
+local att=Instance.new("Attachment")
+att.Parent=beam
+local pe=Instance.new("ParticleEmitter")
+pe.Texture="rbxassetid://6023564802"
+pe.Rate=0
+pe.Lifetime=NumberRange.new(0.3,0.6)
+pe.Speed=NumberRange.new(20,50)
+pe.SpreadAngle=Vector3.new(180,180,180)
+pe.Size=NumberSequence.new({
+NumberSequenceKeypoint.new(0,1.5),
+NumberSequenceKeypoint.new(1,0)
+})
+pe.Transparency=NumberSequence.new({
+NumberSequenceKeypoint.new(0,0),
+NumberSequenceKeypoint.new(1,1)
+})
+pe.Color=ColorSequence.new(Color3.fromRGB(255,150,255))
+pe.LightEmission=1
+pe.Parent=att
+pe:Emit(80)
+D:AddItem(beam,0.5)
+D:AddItem(core,0.5)
+pcall(function()
+local s=Instance.new("Sound")
+s.SoundId="rbxassetid://9125402735"
+s.Volume=1.2
+s.PlaybackSpeed=0.9
+s.Parent=rp
+s:Play()
+D:AddItem(s,2)
+end)
+local ht={}
+local hs={}
+for i=1,10 do
+local pt=o+d*(40*i/10)
+for _,t in pairs(targets(pt,7)) do
+if not hs[t.h] then
+hs[t.h]=true
+table.insert(ht,t)
+end
+end
+end
+dmg(ht,25,80,o,false)
+end
+local cBusy=false
+local function crystal()
+if cBusy then return end
+cBusy=true
+for i=1,15 do
+task.spawn(function()
+local c=Instance.new("Part")
+c.Size=Vector3.new(2.5,2.5,0.1)
+c.Transparency=1
+c.CanCollide=false
+c.Anchored=true
+c.Parent=workspace
+local s1=Instance.new("Decal")
+s1.Texture="rbxassetid://6031075931"
+s1.Face=Enum.NormalId.Front
+s1.Parent=c
+local s2=Instance.new("Decal")
+s2.Texture="rbxassetid://6031075931"
+s2.Face=Enum.NormalId.Back
+s2.Parent=c
+c.CFrame=rp.CFrame*CFrame.new(math.random(-3,3),math.random(0,5),math.random(-2,2)-3)
+c.Anchored=false
+local bv=Instance.new("BodyVelocity")
+local sd=(workspace.CurrentCamera.CFrame.LookVector+Vector3.new(math.random(-15,15)/100,math.random(-10,10)/100,0)).Unit
+bv.Velocity=sd*(70+math.random(0,30))
+bv.MaxForce=Vector3.new(1e6,1e6,1e6)
+bv.Parent=c
+local al=Instance.new("BodyGyro")
+al.MaxTorque=Vector3.new(1e6,1e6,1e6)
+al.P=1e5
+al.Parent=c
+local cn
+cn=RS.RenderStepped:Connect(function()
+if not c or not c.Parent then
+if cn then cn:Disconnect() end
+return
+end
+local cam=workspace.CurrentCamera
+if cam then al.CFrame=CFrame.new(c.Position,c.Position+cam.CFrame.LookVector) end
+end)
+c.Touched:Connect(function(hit)
+local h=hit.Parent:FindFirstChildOfClass("Humanoid")
+if h and h.Health>0 and hit.Parent~=char then
+h:TakeDamage(5)
+if cn then cn:Disconnect() end
+c:Destroy()
+end
+end)
+D:AddItem(c,2)
+end)
+task.wait(0.05)
+end
+task.wait(0.1)
+cBusy=false
 end
 local pPart,pConn,pActive,pY,desc
 pActive=false
