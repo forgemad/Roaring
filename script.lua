@@ -585,27 +585,17 @@ local ballConn=nil
 local ballDescend=false
 local ballHideTask=nil
 local savedSpeed=56
-local savedAnchored=false
 local function hideCharParts()
 for _,v in pairs(char:GetDescendants()) do
-if v:IsA("BasePart") then
-pcall(function() v.Transparency=1 v.CanCollide=false end)
-elseif v:IsA("Decal") or v:IsA("Texture") then
+if v:IsA("BasePart") or v:IsA("Decal") or v:IsA("Texture") then
 pcall(function() v.Transparency=1 end)
 end
 end
 end
 local function showCharParts()
 for _,v in pairs(char:GetDescendants()) do
-if v:IsA("BasePart") then
+if v:IsA("BasePart") or v:IsA("Decal") or v:IsA("Texture") then
 pcall(function() v.Transparency=0 end)
-elseif v:IsA("Decal") or v:IsA("Texture") then
-pcall(function() v.Transparency=0 end)
-end
-end
-for _,p in pairs(char:GetChildren()) do
-if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
-pcall(function() p.CanCollide=true end)
 end
 end
 end
@@ -614,12 +604,7 @@ if ballActive then return end
 ballActive=true
 ballDescend=false
 savedSpeed=hum.WalkSpeed
-savedAnchored=rp.Anchored
-hum.WalkSpeed=0
-hum.JumpPower=0
-hum.JumpHeight=0
-pcall(function() hum.PlatformStand=true end)
-rp.Anchored=true
+hum.WalkSpeed=100
 hideCharParts()
 ballHideTask=task.spawn(function()
 while ballActive do
@@ -633,10 +618,16 @@ ballPart.Shape=Enum.PartType.Ball
 ballPart.Size=Vector3.new(0.5,0.5,0.5)
 ballPart.Material=Enum.Material.Neon
 ballPart.Color=Color3.fromRGB(80,0,120)
-ballPart.Anchored=true
+ballPart.Anchored=false
 ballPart.CanCollide=false
+ballPart.Massless=true
 ballPart.Parent=workspace
 ballPart.CFrame=rp.CFrame
+local weld=Instance.new("Weld")
+weld.Part0=rp
+weld.Part1=ballPart
+weld.C0=CFrame.new(0,0,0)
+weld.Parent=ballPart
 T:Create(ballPart,TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=Vector3.new(2.5,2.5,2.5)}):Play()
 local att=Instance.new("Attachment")
 att.Parent=ballPart
@@ -653,36 +644,23 @@ NumberSequenceKeypoint.new(1,0)
 pe.Color=ColorSequence.new(Color3.fromRGB(200,100,255))
 pe.LightEmission=1
 pe.Parent=att
+local ballBV=Instance.new("BodyVelocity")
+ballBV.MaxForce=Vector3.new(1e6,1e6,1e6)
+ballBV.P=1e5
+ballBV.Velocity=Vector3.new(0,0,0)
+ballBV.Parent=rp
 ballConn=RS.RenderStepped:Connect(function(dt)
 if not ballActive then return end
 if not ballPart or not ballPart.Parent then return end
-if not rp or not rp.Parent then return end
-local cam=workspace.CurrentCamera
-if not cam then return end
-local mv=UIS:GetMoveVector()
-local fwd=cam.CFrame.LookVector
-local fwdF=Vector3.new(fwd.X,0,fwd.Z)
-if fwdF.Magnitude>0.001 then fwdF=fwdF.Unit end
-local rgt=cam.CFrame.RightVector
-local rgtF=Vector3.new(rgt.X,0,rgt.Z)
-if rgtF.Magnitude>0.001 then rgtF=rgtF.Unit end
-local moveVec=Vector3.new(0,0,0)
-if mv.Magnitude>0.1 then
-if mv.Z<-0.1 then moveVec=moveVec+fwdF end
-if mv.Z>0.1 then moveVec=moveVec-fwdF end
-if mv.X<-0.1 then moveVec=moveVec-rgtF end
-if mv.X>0.1 then moveVec=moveVec+rgtF end
-if moveVec.Magnitude>0.01 then moveVec=moveVec.Unit*80 end
-end
-if ballDescend then
-moveVec=moveVec+Vector3.new(0,-150,0)
-else
-moveVec=moveVec+Vector3.new(0,25,0)
-end
-local newPos=rp.Position+moveVec*dt
-rp.CFrame=CFrame.new(newPos)
 local t=tick()
-ballPart.CFrame=CFrame.new(newPos)*CFrame.Angles(t*10,t*7,t*5)
+ballPart.CFrame=rp.CFrame*CFrame.Angles(t*10,t*7,t*5)
+local v=Vector3.new(0,0,0)
+if ballDescend then
+v=Vector3.new(0,-150,0)
+else
+v=Vector3.new(0,25,0)
+end
+ballBV.Velocity=v
 end)
 end
 local function deactivateBall()
@@ -692,13 +670,11 @@ ballDescend=false
 if ballConn then ballConn:Disconnect() ballConn=nil end
 if ballHideTask then pcall(function() task.cancel(ballHideTask) end) ballHideTask=nil end
 if ballPart then ballPart.Parent=nil ballPart:Destroy() ballPart=nil end
+for _,v in pairs(rp:GetChildren()) do
+if v:IsA("BodyVelocity") then v:Destroy() end
+end
 showCharParts()
-pcall(function() hum.PlatformStand=false end)
-rp.Anchored=savedAnchored
-pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
 hum.WalkSpeed=savedSpeed
-hum.JumpPower=50
-hum.JumpHeight=7.2
 end
 local function toggleBall()
 if ballActive then deactivateBall() else activateBall() end
