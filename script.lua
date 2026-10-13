@@ -46,13 +46,11 @@ local function mk(txt,pos,sz,col,ap)
     return b
 end
 
--- ===== ЛЕВЫЕ КНОПКИ В СТОЛБИК У КРАЯ =====
 local bs=UDim2.new(0,70,0,70)
 local bQ=mk("Q\nРывок",UDim2.new(0,8,1,-8),bs,Color3.fromRGB(80,0,120),Vector2.new(0,1))
 local bE=mk("SLASH",UDim2.new(0,8,1,-83),bs,Color3.fromRGB(120,0,60),Vector2.new(0,1))
 local bR=mk("R\nКристалл",UDim2.new(0,8,1,-158),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
 local bF=mk("ROAR",UDim2.new(0,8,1,-233),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
--- ===== ПРАВЫЕ КНОПКИ =====
 local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
 local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))
 local bSet=Instance.new("TextButton")
@@ -198,6 +196,52 @@ pcall(function()
     roar.Parent=rp
     roar:Play()
 end)
+
+-- ===== ЧЁРНЫЙ СЛЕД ЗА ИГРОКОМ ПРИ РЫВКЕ =====
+local dashAtt1=Instance.new("Attachment")
+dashAtt1.Position=Vector3.new(0,-1.5,0)
+dashAtt1.Parent=rp
+local dashAtt2=Instance.new("Attachment")
+dashAtt2.Position=Vector3.new(0,1.5,0)
+dashAtt2.Parent=rp
+local dashTrail=Instance.new("Trail")
+dashTrail.Attachment0=dashAtt1
+dashTrail.Attachment1=dashAtt2
+dashTrail.Color=ColorSequence.new({
+    ColorSequenceKeypoint.new(0,Color3.new(0,0,0)),
+    ColorSequenceKeypoint.new(0.5,Color3.fromRGB(30,0,50)),
+    ColorSequenceKeypoint.new(1,Color3.new(0,0,0))
+})
+dashTrail.Transparency=NumberSequence.new({
+    NumberSequenceKeypoint.new(0,0.1),
+    NumberSequenceKeypoint.new(0.7,0.6),
+    NumberSequenceKeypoint.new(1,1)
+})
+dashTrail.Lifetime=0.7
+dashTrail.MinLength=0
+dashTrail.LightEmission=0
+dashTrail.Enabled=false
+dashTrail.Parent=rp
+
+-- Частицы дыма при рывке
+local dashSmoke=Instance.new("ParticleEmitter")
+dashSmoke.Name="DashSmoke"
+dashSmoke.Texture="rbxassetid://243660364"
+dashSmoke.Rate=0
+dashSmoke.Lifetime=NumberRange.new(0.6,1.2)
+dashSmoke.Speed=NumberRange.new(2,5)
+dashSmoke.SpreadAngle=Vector3.new(30,30,30)
+dashSmoke.Size=NumberSequence.new({
+    NumberSequenceKeypoint.new(0,0.5),
+    NumberSequenceKeypoint.new(1,3)
+})
+dashSmoke.Transparency=NumberSequence.new({
+    NumberSequenceKeypoint.new(0,0.3),
+    NumberSequenceKeypoint.new(1,1)
+})
+dashSmoke.Color=ColorSequence.new(Color3.new(0,0,0))
+dashSmoke.LightEmission=0
+dashSmoke.Parent=rp
 UIS.JumpRequest:Connect(function()
     pcall(function() hum:ChangeState(Enum.HumanoidStateType.Jumping) hum.Jump=true end)
 end)
@@ -288,6 +332,7 @@ local function dir()
     return Vector3.new(0,0,-1)
 end
 
+-- ===== РЫВОК С ЧЁРНЫМ СЛЕДОМ =====
 local dashing=false
 local function dash()
     if dashing then return end
@@ -296,6 +341,9 @@ local function dash()
         pcall(function() dashT:Play(0.05) end)
         task.delay(0.4,function() if dashT then pcall(function() dashT:Stop(0.1) end) end end)
     end
+    -- ⚡ ВКЛЮЧАЕМ СЛЕД И ДЫМ
+    pcall(function() dashTrail.Enabled=true end)
+    pcall(function() dashSmoke:Emit(30) end)
     local d=dir() local sp=rp.Position local tp=sp+d*70
     local wa=rp.Anchored
     pcall(function() rp.Anchored=true end)
@@ -304,6 +352,7 @@ local function dash()
         if not rp.Parent then
             if conn then conn:Disconnect() end
             pcall(function() rp.Anchored=wa end)
+            pcall(function() dashTrail.Enabled=false end)
             dashing=false
             return
         end
@@ -312,9 +361,13 @@ local function dash()
         local e=1-(1-a)*(1-a)
         local np=sp:Lerp(tp,e)
         rp.CFrame=CFrame.new(np,np+d)
+        -- Периодически выпускаем дым во время рывка
+        if math.random()<0.3 then pcall(function() dashSmoke:Emit(5) end) end
         if a>=1 then
             if conn then conn:Disconnect() end
             pcall(function() rp.Anchored=wa end)
+            -- ⚡ ВЫКЛЮЧАЕМ СЛЕД
+            task.delay(0.3,function() pcall(function() dashTrail.Enabled=false end) end)
             dashing=false
         end
     end)
