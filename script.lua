@@ -579,3 +579,111 @@ end)
 UIS.InputEnded:Connect(function(i)
 if i.KeyCode==Enum.KeyCode.F then rl() end
 end)
+local ballActive=false
+local ballPart=nil
+local ballWeld=nil
+local ballSpin=nil
+local savedSpeed=56
+local function activateBall()
+if ballActive then return end
+ballActive=true
+savedSpeed=hum.WalkSpeed
+hum.WalkSpeed=savedSpeed*2
+hum.JumpPower=0
+hum.JumpHeight=0
+for _,p in pairs(char:GetChildren()) do
+if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
+pcall(function() p.Transparency=1 end)
+pcall(function() p.CanCollide=false end)
+end
+end
+for _,v in pairs(char:GetChildren()) do
+if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") then
+pcall(function() v.Transparency=1 end)
+end
+end
+ballPart=Instance.new("Part")
+ballPart.Name="KnightBall"
+ballPart.Shape=Enum.PartType.Ball
+ballPart.Size=Vector3.new(0.5,0.5,0.5)
+ballPart.Material=Enum.Material.Neon
+ballPart.Color=Color3.fromRGB(80,0,120)
+ballPart.Anchored=false
+ballPart.CanCollide=false
+ballPart.Massless=true
+ballPart.Parent=char
+ballWeld=Instance.new("Weld")
+ballWeld.Part0=rp
+ballWeld.Part1=ballPart
+ballWeld.C0=CFrame.new(0,0,0)
+ballWeld.Parent=ballPart
+T:Create(ballPart,TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=Vector3.new(2.5,2.5,2.5)}):Play()
+local att=Instance.new("Attachment")
+att.Parent=ballPart
+local pe=Instance.new("ParticleEmitter")
+pe.Texture="rbxassetid://6023564802"
+pe.Rate=50
+pe.Lifetime=NumberRange.new(0.3,0.6)
+pe.Speed=NumberRange.new(2,6)
+pe.SpreadAngle=Vector3.new(180,180,180)
+pe.Size=NumberSequence.new({
+NumberSequenceKeypoint.new(0,0.6),
+NumberSequenceKeypoint.new(1,0)
+})
+pe.Color=ColorSequence.new(Color3.fromRGB(200,100,255))
+pe.LightEmission=1
+pe.Parent=att
+ballSpin=RS.RenderStepped:Connect(function(dt)
+if ballPart and ballPart.Parent then
+ballPart.CFrame=ballPart.CFrame*CFrame.Angles(dt*10,dt*7,dt*5)
+end
+end)
+end
+local function deactivateBall()
+if not ballActive then return end
+ballActive=false
+if ballSpin then ballSpin:Disconnect() ballSpin=nil end
+if ballWeld then ballWeld:Destroy() ballWeld=nil end
+if ballPart then ballPart.Parent=nil ballPart:Destroy() ballPart=nil end
+for _,p in pairs(char:GetChildren()) do
+if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
+pcall(function() p.Transparency=0 end)
+pcall(function() p.CanCollide=true end)
+end
+end
+for _,v in pairs(char:GetChildren()) do
+if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") then
+pcall(function() v.Transparency=0 end)
+end
+end
+hum.WalkSpeed=savedSpeed
+hum.JumpPower=50
+hum.JumpHeight=7.2
+end
+local function toggleBall()
+if ballActive then deactivateBall() else activateBall() end
+end
+local bB=mk("BALL",UDim2.new(0,105,1,-195),UDim2.new(0,85,0,85),Color3.fromRGB(150,0,200),Vector2.new(0,1))
+press(bB,function()
+toggleBall()
+if ballActive then
+bB.Text="EXIT"
+bB.BackgroundColor3=Color3.fromRGB(200,0,0)
+else
+bB.Text="BALL"
+bB.BackgroundColor3=Color3.fromRGB(150,0,200)
+end
+end)
+UIS.InputBegan:Connect(function(i,gp)
+if gp then return end
+if i.KeyCode==Enum.KeyCode.B then
+toggleBall()
+if ballActive then
+bB.Text="EXIT"
+bB.BackgroundColor3=Color3.fromRGB(200,0,0)
+else
+bB.Text="BALL"
+bB.BackgroundColor3=Color3.fromRGB(150,0,200)
+end
+end
+end)
