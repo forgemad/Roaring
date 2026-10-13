@@ -16,7 +16,6 @@ local gui=Instance.new("ScreenGui")
 gui.Name="RoaringKnightUI" gui.ResetOnSpawn=false gui.IgnoreGuiInset=true gui.Parent=pg
 pcall(function() hum.WalkSpeed=56 end)
 
--- ===== АНИМАЦИИ =====
 local idleT,walkT,slashT,dashT
 local function loadAnims()
     pcall(function()
@@ -36,7 +35,6 @@ loadAnims()
 
 local function press(b,cb) b.InputBegan:Connect(function(i) if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then pcall(cb) end end) end
 
--- ===== КНОПКИ =====
 local function mk(txt,pos,sz,col,ap)
     local b=Instance.new("TextButton")
     b.Size=sz b.Position=pos b.AnchorPoint=ap or Vector2.new(0,1)
@@ -55,8 +53,7 @@ local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,1
 local bF=mk("ROAR",UDim2.new(0,110,1,-15),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
 local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
 local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))
-
--- Перетаскиваемая кнопка настроек
+-- Кнопка настроек (перетаскиваемая)
 local bSet=Instance.new("TextButton")
 bSet.Size=UDim2.new(0,50,0,50) bSet.Position=UDim2.new(1,-70,0,15)
 bSet.BackgroundColor3=Color3.fromRGB(40,40,40) bSet.BackgroundTransparency=0.2
@@ -109,7 +106,7 @@ help.Size=UDim2.new(1,-20,0,140) help.Position=UDim2.new(0,10,0,180)
 help.BackgroundTransparency=1 help.TextColor3=Color3.fromRGB(230,220,255)
 help.TextXAlignment=Enum.TextXAlignment.Left help.TextYAlignment=Enum.TextYAlignment.Top
 help.TextSize=13 help.Font=Enum.Font.Gotham help.TextWrapped=true
-help.Text="Q — Рывок (70 studs)\nSLASH — 25 урона\nR — 15 кристаллов (5 урона)\nROAR — зажми и отпусти\nPLATFORM — площадка\nDESCEND — зажми спуск\n\nПК: Q/E/R/F/G — способности\nH — сброс анимаций"
+help.Text="Q — Рывок (70 studs)\nSLASH — 25 урона\nR — 15 кристаллов\nROAR — зажми и отпусти\nPLATFORM — площадка\nDESCEND — зажми спуск\n\nПК: Q/E/R/F/G/H"
 
 press(bSet,function() panel.Visible=not panel.Visible end)
 press(btnClose,function() panel.Visible=false end)
@@ -130,7 +127,6 @@ press(btnRS,function()
     task.delay(0.3,function() btnRS.BackgroundColor3=Color3.fromRGB(120,0,60) end)
 end)
 
--- ===== ОБВОДКИ =====
 pcall(function()
     local h=Instance.new("Highlight")
     h.FillTransparency=1 h.OutlineColor=Color3.new(1,1,1)
@@ -142,7 +138,6 @@ pcall(function()
     h.OutlineTransparency=0 h.Adornee=workspace h.Parent=gui
 end)
 
--- ===== МОРФ (чёрное тело) =====
 pcall(function()
     for _,p in pairs(char:GetChildren()) do
         if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
@@ -152,19 +147,14 @@ pcall(function()
     end
 end)
 
--- ===== ВИДИМЫЙ МЕЧ ЧЕРЕЗ AddAccessory =====
 pcall(function()
-    -- Удаляем старые мечи
     for _,v in pairs(char:GetChildren()) do
         if v.Name=="KnightSword" or v.Name=="KnightSwordAcc" then
             pcall(function() v:Destroy() end)
         end
     end
-    
-    -- Создаём аксессуар (реплицируется сервером — виден другим!)
     local acc=Instance.new("Accessory")
     acc.Name="KnightSwordAcc"
-    
     local handle=Instance.new("Part")
     handle.Name="Handle"
     handle.Size=Vector3.new(0.4,0.4,7)
@@ -174,20 +164,12 @@ pcall(function()
     handle.CanCollide=false
     handle.Massless=true
     handle.Parent=acc
-    
     local grip=Instance.new("Attachment")
     grip.Name="RightGripAttachment"
     grip.Position=Vector3.new(0,0,-3.5)
     grip.Parent=handle
-    
-    local att=Instance.new("Attachment")
-    att.Name="AccessoryWeld"
-    att.Parent=handle
-    
-    -- Добавляем через Humanoid → реплицируется
     local ok=pcall(function() hum:AddAccessory(acc) end)
     if not ok then
-        -- Резервный вариант: обычный weld
         local sw=Instance.new("Part")
         sw.Name="KnightSword"
         sw.Size=Vector3.new(0.35,0.35,7)
@@ -203,7 +185,6 @@ pcall(function()
     end
 end)
 
--- ===== ЗВУК РЫЧАНИЯ (слышат другие) =====
 pcall(function()
     for _,v in pairs(rp:GetChildren()) do
         if v.Name=="KnightRoarSound" then v:Destroy() end
@@ -217,8 +198,6 @@ pcall(function()
     roar.Parent=rp
     roar:Play()
 end)
-
--- ===== БЕСКОНЕЧНЫЙ ПРЫЖОК =====
 UIS.JumpRequest:Connect(function()
     pcall(function() hum:ChangeState(Enum.HumanoidStateType.Jumping) hum.Jump=true end)
 end)
@@ -235,7 +214,6 @@ task.spawn(function()
     end
 end)
 
--- ===== ХЕЛПЕРЫ =====
 local function targets(o,r)
     local t={}
     for _,p in pairs(P:GetPlayers()) do
@@ -252,6 +230,7 @@ local function targets(o,r)
     end
     return t
 end
+
 local function dmg(ts,d,kb,o,fk)
     for _,t in pairs(ts) do
         if t.h and t.h.Parent and t.h.Health>0 then
@@ -286,6 +265,7 @@ local function dmg(ts,d,kb,o,fk)
         end
     end
 end
+
 local function dir()
     local c=workspace.CurrentCamera
     if not c then return Vector3.new(0,0,-1) end
@@ -308,7 +288,6 @@ local function dir()
     return Vector3.new(0,0,-1)
 end
 
--- ===== РЫВОК =====
 local dashing=false
 local function dash()
     if dashing then return end
@@ -348,7 +327,6 @@ local function dash()
     end)
 end
 
--- ===== SLASH =====
 local lastS=0
 local function slash()
     if tick()-lastS<1.5 then return end
@@ -388,7 +366,6 @@ local function slash()
     dmg(ht,25,80,o,false)
 end
 
--- ===== КРИСТАЛЛ =====
 local cBusy=false
 local function crystal()
     if cBusy then return end
@@ -431,8 +408,6 @@ local function crystal()
     task.wait(0.1)
     cBusy=false
 end
-
--- ===== ПЛАТФОРМА =====
 local pPart,pConn,pActive,pY,desc
 pActive=false desc=false pY=0
 local function rmPlat()
@@ -468,7 +443,6 @@ local function mkPlat()
     return false
 end
 
--- ===== ROAR =====
 local charging=false cStart=0 cSphere=nil cConn=nil
 local function startC()
     if charging then return end
@@ -482,4 +456,92 @@ local function startC()
     cSphere.Anchored=true cSphere.CanCollide=false cSphere.Parent=workspace
     cConn=RS.RenderStepped:Connect(function()
         if not charging or not cSphere or not cSphere.Parent then return end
-        local el=math.min(tick()-cStart
+        local el=math.min(tick()-cStart,2)
+        local t=el/2
+        local r=8+(40-8)*t
+        cSphere.Size=Vector3.new(r*2,r*2,r*2)
+        cSphere.CFrame=CFrame.new(rp.Position)
+    end)
+end
+local function relC()
+    if not charging then return end
+    charging=false
+    if cConn then cConn:Disconnect() cConn=nil end
+    if cSphere then pcall(function() cSphere:Destroy() end) cSphere=nil end
+    local el=math.min(tick()-cStart,2)
+    local t=el/2
+    local r=8+(40-8)*t
+    local o=rp.Position
+    local e=Instance.new("Part")
+    e.Shape=Enum.PartType.Ball
+    e.Size=Vector3.new(r*2,r*2,r*2)
+    e.Material=Enum.Material.Neon
+    e.Color=Color3.new(1,1,1)
+    e.Transparency=0.1
+    e.Anchored=true e.CanCollide=false
+    e.CFrame=CFrame.new(o) e.Parent=workspace
+    T:Create(e,TweenInfo.new(0.35),{Transparency=1,Size=Vector3.new(r*3,r*3,r*3)}):Play()
+    D:AddItem(e,0.4)
+    pcall(function()
+        local s=Instance.new("Sound")
+        s.SoundId="rbxassetid://293168581"
+        s.Volume=0.4 s.PlaybackSpeed=0.9
+        s.Parent=rp s:Play()
+        D:AddItem(s,3)
+    end)
+    dmg(targets(o,r),9999,100,o,true)
+end
+
+press(bQ,function() dash() end)
+press(bE,function() slash() end)
+press(bR,function() crystal() end)
+press(bP,function()
+    if pActive then
+        rmPlat()
+        bP.Text="PLATFORM"
+        bP.BackgroundColor3=Color3.fromRGB(80,0,120)
+    else
+        if mkPlat() then
+            bP.Text="STOP"
+            bP.BackgroundColor3=Color3.fromRGB(150,0,0)
+        end
+    end
+end)
+bF.InputBegan:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then startC() end
+end)
+bF.InputEnded:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then relC() end
+end)
+bD.InputBegan:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+        if pActive then desc=true end
+    end
+end)
+bD.InputEnded:Connect(function(i)
+    if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then desc=false end
+end)
+
+UIS.InputBegan:Connect(function(i,gp)
+    if gp then return end
+    if i.KeyCode==Enum.KeyCode.Q then dash()
+    elseif i.KeyCode==Enum.KeyCode.E then slash()
+    elseif i.KeyCode==Enum.KeyCode.R then crystal()
+    elseif i.KeyCode==Enum.KeyCode.F then startC()
+    elseif i.KeyCode==Enum.KeyCode.G then
+        if pActive then
+            rmPlat()
+            bP.Text="PLATFORM"
+            bP.BackgroundColor3=Color3.fromRGB(80,0,120)
+        else
+            if mkPlat() then
+                bP.Text="STOP"
+                bP.BackgroundColor3=Color3.fromRGB(150,0,0)
+            end
+        end
+    elseif i.KeyCode==Enum.KeyCode.H then loadAnims()
+    end
+end)
+UIS.InputEnded:Connect(function(i)
+    if i.KeyCode==Enum.KeyCode.F then relC() end
+end)
