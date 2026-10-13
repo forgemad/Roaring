@@ -340,6 +340,25 @@ pe.Parent=att
 pe:Emit(80)
 D:AddItem(beam,0.5)
 D:AddItem(core,0.5)
+task.spawn(function()
+task.wait(0.25)
+pcall(function()
+beam.Transparency=0.5
+core.Transparency=0.5
+end)
+task.wait(0.25)
+pcall(function()
+beam.Transparency=1
+core.Transparency=1
+end)
+task.wait(0.1)
+pcall(function()
+if beam and beam.Parent then beam:Destroy() end
+end)
+pcall(function()
+if core and core.Parent then core:Destroy() end
+end)
+end)
 pcall(function()
 local s=Instance.new("Sound")
 s.SoundId="rbxassetid://9125402735"
@@ -513,54 +532,3 @@ D:AddItem(s,3)
 end)
 dmg(targets(o,rr),9999,100,o,true)
 end
-press(bQ,function() dash() end)
-press(bE,function() slash() end)
-press(bR,function() crystal() end)
-press(bP,function()
-if pActive then
-rmPlat()
-bP.Text="PLATFORM"
-bP.BackgroundColor3=Color3.fromRGB(80,0,120)
-else
-if mkPlat() then
-bP.Text="STOP"
-bP.BackgroundColor3=Color3.fromRGB(150,0,0)
-end
-end
-end)
-bF.InputBegan:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then st() end
-end)
-bF.InputEnded:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then rl() end
-end)
-bD.InputBegan:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-if pActive then desc=true end
-end
-end)
-bD.InputEnded:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then desc=false end
-end)
-UIS.InputBegan:Connect(function(i,gp)
-if gp then return end
-if i.KeyCode==Enum.KeyCode.Q then dash()
-elseif i.KeyCode==Enum.KeyCode.E then slash()
-elseif i.KeyCode==Enum.KeyCode.R then crystal()
-elseif i.KeyCode==Enum.KeyCode.F then st()
-elseif i.KeyCode==Enum.KeyCode.G then
-if pActive then
-rmPlat()
-bP.Text="PLATFORM"
-bP.BackgroundColor3=Color3.fromRGB(80,0,120)
-else
-if mkPlat() then
-bP.Text="STOP"
-bP.BackgroundColor3=Color3.fromRGB(150,0,0)
-end
-end
-elseif i.KeyCode==Enum.KeyCode.H then loadAnims() end
-end)
-UIS.InputEnded:Connect(function(i)
-if i.KeyCode==Enum.KeyCode.F then rl() end
-end)
