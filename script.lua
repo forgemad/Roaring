@@ -584,26 +584,48 @@ local ballPart=nil
 local ballWeld=nil
 local ballSpin=nil
 local ballVel=nil
+local ballDescend=false
+local ballHideTask=nil
 local savedSpeed=56
-local function activateBall()
-if ballActive then return end
-ballActive=true
-savedSpeed=hum.WalkSpeed
-hum.WalkSpeed=savedSpeed*2
-hum.JumpPower=0
-hum.JumpHeight=0
-hum.PlatformStand=true
-for _,p in pairs(char:GetChildren()) do
-if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
-pcall(function() p.Transparency=1 end)
-pcall(function() p.CanCollide=false end)
-end
-end
+local function hideCharParts()
 for _,v in pairs(char:GetDescendants()) do
-if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Decal") then
+if v:IsA("BasePart") then
+pcall(function() v.Transparency=1 v.CanCollide=false end)
+elseif v:IsA("Decal") or v:IsA("Texture") then
 pcall(function() v.Transparency=1 end)
 end
 end
+end
+local function showCharParts()
+for _,v in pairs(char:GetDescendants()) do
+if v:IsA("BasePart") then
+pcall(function() v.Transparency=0 end)
+elseif v:IsA("Decal") or v:IsA("Texture") then
+pcall(function() v.Transparency=0 end)
+end
+end
+for _,p in pairs(char:GetChildren()) do
+if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
+pcall(function() p.CanCollide=true end)
+end
+end
+end
+local function activateBall()
+if ballActive then return end
+ballActive=true
+ballDescend=false
+savedSpeed=hum.WalkSpeed
+hum.WalkSpeed=0
+hum.JumpPower=0
+hum.JumpHeight=0
+pcall(function() hum.PlatformStand=true end)
+hideCharParts()
+ballHideTask=task.spawn(function()
+while ballActive do
+task.wait(0.2)
+hideCharParts()
+end
+end)
 ballPart=Instance.new("Part")
 ballPart.Name="KnightBall"
 ballPart.Shape=Enum.PartType.Ball
@@ -613,7 +635,7 @@ ballPart.Color=Color3.fromRGB(80,0,120)
 ballPart.Anchored=false
 ballPart.CanCollide=false
 ballPart.Massless=true
-ballPart.Parent=char
+ballPart.Parent=workspace
 ballWeld=Instance.new("Weld")
 ballWeld.Part0=rp
 ballWeld.Part1=ballPart
@@ -643,46 +665,43 @@ pe.Parent=att
 ballSpin=RS.RenderStepped:Connect(function(dt)
 if not ballPart or not ballPart.Parent then return end
 ballPart.CFrame=ballPart.CFrame*CFrame.Angles(dt*10,dt*7,dt*5)
-local flyUp=UIS:IsKeyDown(Enum.KeyCode.Space) or UIS:IsKeyDown(Enum.KeyCode.W)
-local descDown=UIS:IsKeyDown(Enum.KeyCode.LeftShift) or UIS:IsKeyDown(Enum.KeyCode.S)
+local cam=workspace.CurrentCamera
+if not cam then return end
 local mv=UIS:GetMoveVector()
-local dirs=workspace.CurrentCamera.CFrame
-local fwd=Vector3.new(dirs.LookVector.X,0,dirs.LookVector.Z)
-if fwd.Magnitude>0.001 then fwd=fwd.Unit end
-local rgt=Vector3.new(dirs.RightVector.X,0,dirs.RightVector.Z)
-if rgt.Magnitude>0.001 then rgt=rgt.Unit end
-local moveDir=Vector3.new(0,0,0)
+local fwd=cam.CFrame.LookVector
+local fwdF=Vector3.new(fwd.X,0,fwd.Z)
+if fwdF.Magnitude>0.001 then fwdF=fwdF.Unit end
+local rgt=cam.CFrame.RightVector
+local rgtF=Vector3.new(rgt.X,0,rgt.Z)
+if rgtF.Magnitude>0.001 then rgtF=rgtF.Unit end
+local v=Vector3.new(0,0,0)
 if mv.Magnitude>0.1 then
-if mv.Z<-0.1 then moveDir=moveDir+fwd end
-if mv.Z>0.1 then moveDir=moveDir-fwd end
-if mv.X<-0.1 then moveDir=moveDir-rgt end
-if mv.X>0.1 then moveDir=moveDir+rgt end
+if mv.Z<-0.1 then v=v+fwdF end
+if mv.Z>0.1 then v=v-fwdF end
+if mv.X<-0.1 then v=v-rgtF end
+if mv.X>0.1 then v=v+rgtF end
+if v.Magnitude>0.01 then v=v.Unit*80 end
 end
-local v=moveDir.Unit*80
-if flyUp then v=v+Vector3.new(0,60,0) end
-if descDown then v=v+Vector3.new(0,-120,0) end
+if ballDescend then
+v=v+Vector3.new(0,-150,0)
+else
+v=v+Vector3.new(0,25,0)
+end
 ballVel.Velocity=v
 end)
 end
 local function deactivateBall()
 if not ballActive then return end
 ballActive=false
+ballDescend=false
 if ballSpin then ballSpin:Disconnect() ballSpin=nil end
+if ballHideTask then pcall(function() task.cancel(ballHideTask) end) ballHideTask=nil end
 if ballWeld then ballWeld:Destroy() ballWeld=nil end
 if ballVel then ballVel:Destroy() ballVel=nil end
 if ballPart then ballPart.Parent=nil ballPart:Destroy() ballPart=nil end
-for _,p in pairs(char:GetChildren()) do
-if p:IsA("BasePart") and p.Name~="HumanoidRootPart" then
-pcall(function() p.Transparency=0 end)
-pcall(function() p.CanCollide=true end)
-end
-end
-for _,v in pairs(char:GetDescendants()) do
-if v:IsA("Accessory") or v:IsA("Shirt") or v:IsA("Pants") or v:IsA("Decal") then
-pcall(function() v.Transparency=0 end)
-end
-end
-hum.PlatformStand=false
+showCharParts()
+pcall(function() hum.PlatformStand=false end)
+pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
 hum.WalkSpeed=savedSpeed
 hum.JumpPower=50
 hum.JumpHeight=7.2
@@ -701,7 +720,6 @@ bB.Text="BALL"
 bB.BackgroundColor3=Color3.fromRGB(150,0,200)
 end
 end)
-local ballDescend=false
 bD.InputBegan:Connect(function(i)
 if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
 if ballActive then ballDescend=true end
@@ -709,7 +727,12 @@ end
 end)
 bD.InputEnded:Connect(function(i)
 if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-if ballActive then ballDescend=false end
+ballDescend=false
+end
+end)
+UIS.InputEnded:Connect(function(i)
+if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then
+ballDescend=false
 end
 end)
 UIS.InputBegan:Connect(function(i,gp)
