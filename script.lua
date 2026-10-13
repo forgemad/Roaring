@@ -581,12 +581,11 @@ if i.KeyCode==Enum.KeyCode.F then rl() end
 end)
 local ballActive=false
 local ballPart=nil
-local ballWeld=nil
-local ballSpin=nil
-local ballVel=nil
+local ballConn=nil
 local ballDescend=false
 local ballHideTask=nil
 local savedSpeed=56
+local savedAnchored=false
 local function hideCharParts()
 for _,v in pairs(char:GetDescendants()) do
 if v:IsA("BasePart") then
@@ -615,10 +614,12 @@ if ballActive then return end
 ballActive=true
 ballDescend=false
 savedSpeed=hum.WalkSpeed
+savedAnchored=rp.Anchored
 hum.WalkSpeed=0
 hum.JumpPower=0
 hum.JumpHeight=0
 pcall(function() hum.PlatformStand=true end)
+rp.Anchored=true
 hideCharParts()
 ballHideTask=task.spawn(function()
 while ballActive do
@@ -632,21 +633,11 @@ ballPart.Shape=Enum.PartType.Ball
 ballPart.Size=Vector3.new(0.5,0.5,0.5)
 ballPart.Material=Enum.Material.Neon
 ballPart.Color=Color3.fromRGB(80,0,120)
-ballPart.Anchored=false
+ballPart.Anchored=true
 ballPart.CanCollide=false
-ballPart.Massless=true
 ballPart.Parent=workspace
-ballWeld=Instance.new("Weld")
-ballWeld.Part0=rp
-ballWeld.Part1=ballPart
-ballWeld.C0=CFrame.new(0,0,0)
-ballWeld.Parent=ballPart
+ballPart.CFrame=rp.CFrame
 T:Create(ballPart,TweenInfo.new(0.3,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=Vector3.new(2.5,2.5,2.5)}):Play()
-ballVel=Instance.new("BodyVelocity")
-ballVel.MaxForce=Vector3.new(1e6,1e6,1e6)
-ballVel.P=1e5
-ballVel.Velocity=Vector3.new(0,0,0)
-ballVel.Parent=rp
 local att=Instance.new("Attachment")
 att.Parent=ballPart
 local pe=Instance.new("ParticleEmitter")
@@ -662,9 +653,10 @@ NumberSequenceKeypoint.new(1,0)
 pe.Color=ColorSequence.new(Color3.fromRGB(200,100,255))
 pe.LightEmission=1
 pe.Parent=att
-ballSpin=RS.RenderStepped:Connect(function(dt)
+ballConn=RS.RenderStepped:Connect(function(dt)
+if not ballActive then return end
 if not ballPart or not ballPart.Parent then return end
-ballPart.CFrame=ballPart.CFrame*CFrame.Angles(dt*10,dt*7,dt*5)
+if not rp or not rp.Parent then return end
 local cam=workspace.CurrentCamera
 if not cam then return end
 local mv=UIS:GetMoveVector()
@@ -674,33 +666,35 @@ if fwdF.Magnitude>0.001 then fwdF=fwdF.Unit end
 local rgt=cam.CFrame.RightVector
 local rgtF=Vector3.new(rgt.X,0,rgt.Z)
 if rgtF.Magnitude>0.001 then rgtF=rgtF.Unit end
-local v=Vector3.new(0,0,0)
+local moveVec=Vector3.new(0,0,0)
 if mv.Magnitude>0.1 then
-if mv.Z<-0.1 then v=v+fwdF end
-if mv.Z>0.1 then v=v-fwdF end
-if mv.X<-0.1 then v=v-rgtF end
-if mv.X>0.1 then v=v+rgtF end
-if v.Magnitude>0.01 then v=v.Unit*80 end
+if mv.Z<-0.1 then moveVec=moveVec+fwdF end
+if mv.Z>0.1 then moveVec=moveVec-fwdF end
+if mv.X<-0.1 then moveVec=moveVec-rgtF end
+if mv.X>0.1 then moveVec=moveVec+rgtF end
+if moveVec.Magnitude>0.01 then moveVec=moveVec.Unit*80 end
 end
 if ballDescend then
-v=v+Vector3.new(0,-150,0)
+moveVec=moveVec+Vector3.new(0,-150,0)
 else
-v=v+Vector3.new(0,25,0)
+moveVec=moveVec+Vector3.new(0,25,0)
 end
-ballVel.Velocity=v
+local newPos=rp.Position+moveVec*dt
+rp.CFrame=CFrame.new(newPos)
+local t=tick()
+ballPart.CFrame=CFrame.new(newPos)*CFrame.Angles(t*10,t*7,t*5)
 end)
 end
 local function deactivateBall()
 if not ballActive then return end
 ballActive=false
 ballDescend=false
-if ballSpin then ballSpin:Disconnect() ballSpin=nil end
+if ballConn then ballConn:Disconnect() ballConn=nil end
 if ballHideTask then pcall(function() task.cancel(ballHideTask) end) ballHideTask=nil end
-if ballWeld then ballWeld:Destroy() ballWeld=nil end
-if ballVel then ballVel:Destroy() ballVel=nil end
 if ballPart then ballPart.Parent=nil ballPart:Destroy() ballPart=nil end
 showCharParts()
 pcall(function() hum.PlatformStand=false end)
+rp.Anchored=savedAnchored
 pcall(function() hum:ChangeState(Enum.HumanoidStateType.GettingUp) end)
 hum.WalkSpeed=savedSpeed
 hum.JumpPower=50
