@@ -82,9 +82,10 @@ local bs=UDim2.new(0,80,0,80)
 local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(80,0,120),Vector2.new(0,1))
 local bE=mk("SLASH",UDim2.new(0,15,1,-100),bs,Color3.fromRGB(120,0,60),Vector2.new(0,1))
 local bR=mk("R\nКристалл",UDim2.new(0,15,1,-185),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
-local bF=mk("ROAR",UDim2.new(0,15,1,-270),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
-local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
+local bB=mk("BALL",UDim2.new(0,100,1,-185),bs,Color3.fromRGB(150,0,200),Vector2.new(0,1))
 local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))
+local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
+local bF=mk("ROAR",UDim2.new(1,-15,1,-245),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,140),Vector2.new(1,1))
 pcall(function()
 local h=Instance.new("Highlight")
 h.FillTransparency=1
@@ -819,7 +820,6 @@ end
 local function toggleBall()
 if ballActive then deactivateBall() else activateBall() end
 end
-local bB=mk("BALL",UDim2.new(0,15,1,-355),UDim2.new(0,80,0,80),Color3.fromRGB(150,0,200),Vector2.new(0,1))
 press(bB,function()
 toggleBall()
 if ballActive then
