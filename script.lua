@@ -78,11 +78,11 @@ s.Thickness=2
 s.Parent=b
 return b
 end
-local bs=UDim2.new(0,85,0,85)
-local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-105),bs,Color3.fromRGB(80,0,120),Vector2.new(0,1))
-local bE=mk("SLASH",UDim2.new(0,105,1,-105),bs,Color3.fromRGB(120,0,60),Vector2.new(0,1))
-local bR=mk("R\nКристалл",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
-local bF=mk("ROAR",UDim2.new(0,105,1,-15),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
+local bs=UDim2.new(0,80,0,80)
+local bQ=mk("Q\nРывок",UDim2.new(0,15,1,-15),bs,Color3.fromRGB(80,0,120),Vector2.new(0,1))
+local bE=mk("SLASH",UDim2.new(0,15,1,-100),bs,Color3.fromRGB(120,0,60),Vector2.new(0,1))
+local bR=mk("R\nКристалл",UDim2.new(0,15,1,-185),bs,Color3.fromRGB(60,0,120),Vector2.new(0,1))
+local bF=mk("ROAR",UDim2.new(0,15,1,-270),bs,Color3.fromRGB(80,0,140),Vector2.new(0,1))
 local bP=mk("PLATFORM",UDim2.new(1,-15,1,-165),UDim2.new(0,75,0,75),Color3.fromRGB(80,0,120),Vector2.new(1,1))
 local bD=mk("DESCEND",UDim2.new(1,-15,1,-85),UDim2.new(0,75,0,75),Color3.fromRGB(100,0,0),Vector2.new(1,1))
 pcall(function()
@@ -135,115 +135,6 @@ roar.PlaybackSpeed=0.1
 roar.Parent=rp
 roar:Play()
 end)
-local dashing=false
-local function dash()
-if dashing then return end
-dashing=true
-if dashT then
-pcall(function() dashT:Play(0.05) end)
-task.delay(0.4,function() if dashT then pcall(function() dashT:Stop(0.1) end) end end)
-end
-pcall(function() dTrail.Enabled=true end)
-pcall(function()
-local s=Instance.new("Sound")
-s.SoundId="rbxassetid://9125402735"
-s.Volume=0.8
-s.PlaybackSpeed=1.2
-s.Parent=rp
-s:Play()
-task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
-end)
-local fA1=Instance.new("Attachment")
-fA1.Position=Vector3.new(0,-1.5,0)
-fA1.Parent=rp
-local fA2=Instance.new("Attachment")
-fA2.Position=Vector3.new(0,1.5,0)
-fA2.Parent=rp
-local fTrail=Instance.new("Trail")
-fTrail.Attachment0=fA1
-fTrail.Attachment1=fA2
-fTrail.Color=ColorSequence.new({
-ColorSequenceKeypoint.new(0,Color3.fromRGB(255,200,0)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,80,0)),
-ColorSequenceKeypoint.new(1,Color3.fromRGB(100,0,0))
-})
-fTrail.Transparency=NumberSequence.new({
-NumberSequenceKeypoint.new(0,0.2),
-NumberSequenceKeypoint.new(1,1)
-})
-fTrail.Lifetime=0.8
-fTrail.LightEmission=1
-fTrail.Parent=rp
-local fP=Instance.new("ParticleEmitter")
-fP.Texture="rbxassetid://243660364"
-fP.Rate=80
-fP.Lifetime=NumberRange.new(0.4,0.8)
-fP.Speed=NumberRange.new(3,8)
-fP.SpreadAngle=Vector3.new(20,20,20)
-fP.Size=NumberSequence.new({
-NumberSequenceKeypoint.new(0,0.5),
-NumberSequenceKeypoint.new(1,2.5)
-})
-fP.Transparency=NumberSequence.new({
-NumberSequenceKeypoint.new(0,0.2),
-NumberSequenceKeypoint.new(1,1)
-})
-fP.Color=ColorSequence.new({
-ColorSequenceKeypoint.new(0,Color3.fromRGB(255,200,0)),
-ColorSequenceKeypoint.new(1,Color3.fromRGB(150,0,0))
-})
-fP.LightEmission=1
-fP.Parent=rp
-local d=dir()
-local sp=rp.Position
-local tp=sp+d*70
-local wa=rp.Anchored
-pcall(function() rp.Anchored=true end)
-local el=0
-local conn
-conn=RS.RenderStepped:Connect(function(dt)
-if not rp.Parent then
-if conn then conn:Disconnect() end
-pcall(function() rp.Anchored=wa end)
-pcall(function() dTrail.Enabled=false end)
-pcall(function() fTrail.Enabled=false end)
-fP.Enabled=false
-task.delay(0.6,function()
-pcall(function() fTrail:Destroy() end)
-pcall(function() fP:Destroy() end)
-pcall(function() fA1:Destroy() end)
-pcall(function() fA2:Destroy() end)
-end)
-dashing=false
-return
-end
-el=el+dt
-local a=math.min(el/0.3,1)
-local e=1-(1-a)*(1-a)
-local np=sp:Lerp(tp,e)
-rp.CFrame=CFrame.new(np,np+d)
-if a>=1 then
-if conn then conn:Disconnect() end
-pcall(function() rp.Anchored=wa end)
-pcall(function() dTrail.Enabled=false end)
-fP.Enabled=false
-task.delay(0.6,function()
-pcall(function() fTrail:Destroy() end)
-pcall(function() fP:Destroy() end)
-pcall(function() fA1:Destroy() end)
-pcall(function() fA2:Destroy() end)
-end)
-dashing=false
-end
-end)
-task.spawn(function()
-for i=1,20 do
-task.wait(0.015)
-if not rp or not rp.Parent then return end
-dmg(targets(rp.Position,6),9999,0,rp.Position,true)
-end
-end)
-end
 local dA1=Instance.new("Attachment")
 dA1.Position=Vector3.new(0,-1.5,0)
 dA1.Parent=rp
@@ -350,6 +241,91 @@ local cl=c.CFrame.LookVector
 local fl=Vector3.new(cl.X,0,cl.Z)
 if fl.Magnitude>0.01 then return fl.Unit end
 return Vector3.new(0,0,-1)
+end
+local dashing=false
+local function dash()
+if dashing then return end
+dashing=true
+if dashT then
+pcall(function() dashT:Play(0.05) end)
+task.delay(0.4,function() if dashT then pcall(function() dashT:Stop(0.1) end) end end)
+end
+pcall(function() dTrail.Enabled=true end)
+pcall(function()
+local s=Instance.new("Sound")
+s.SoundId="rbxassetid://9125402735"
+s.Volume=0.8
+s.PlaybackSpeed=1.2
+s.Parent=rp
+s:Play()
+task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
+end)
+local fA1=Instance.new("Attachment")
+fA1.Position=Vector3.new(0,-1.5,0)
+fA1.Parent=rp
+local fA2=Instance.new("Attachment")
+fA2.Position=Vector3.new(0,1.5,0)
+fA2.Parent=rp
+local fTrail=Instance.new("Trail")
+fTrail.Attachment0=fA1
+fTrail.Attachment1=fA2
+fTrail.Color=ColorSequence.new({
+ColorSequenceKeypoint.new(0,Color3.fromRGB(255,200,0)),
+ColorSequenceKeypoint.new(0.5,Color3.fromRGB(255,80,0)),
+ColorSequenceKeypoint.new(1,Color3.fromRGB(100,0,0))
+})
+fTrail.Transparency=NumberSequence.new({
+NumberSequenceKeypoint.new(0,0.2),
+NumberSequenceKeypoint.new(1,1)
+})
+fTrail.Lifetime=0.8
+fTrail.LightEmission=1
+fTrail.Parent=rp
+local fP=Instance.new("ParticleEmitter")
+fP.Texture="rbxassetid://243660364"
+fP.Rate=80
+fP.Lifetime=NumberRange.new(0.4,0.8)
+fP.Speed=NumberRange.new(3,8)
+fP.SpreadAngle=Vector3.new(20,20,20)
+fP.Size=NumberSequence.new({
+NumberSequenceKeypoint.new(0,0.5),
+NumberSequenceKeypoint.new(1,2.5)
+})
+fP.Transparency=NumberSequence.new({
+NumberSequenceKeypoint.new(0,0.2),
+NumberSequenceKeypoint.new(1,1)
+})
+fP.Color=ColorSequence.new({
+ColorSequenceKeypoint.new(0,Color3.fromRGB(255,200,0)),
+ColorSequenceKeypoint.new(1,Color3.fromRGB(150,0,0))
+})
+fP.LightEmission=1
+fP.Parent=rp
+local d=dir()
+local bv=Instance.new("BodyVelocity")
+bv.MaxForce=Vector3.new(1e6,1e6,1e6)
+bv.P=1e5
+bv.Velocity=d*300
+bv.Parent=rp
+task.delay(0.25,function()
+pcall(function() bv:Destroy() end)
+pcall(function() dTrail.Enabled=false end)
+fP.Enabled=false
+task.delay(0.6,function()
+pcall(function() fTrail:Destroy() end)
+pcall(function() fP:Destroy() end)
+pcall(function() fA1:Destroy() end)
+pcall(function() fA2:Destroy() end)
+end)
+dashing=false
+end)
+task.spawn(function()
+for i=1,20 do
+task.wait(0.015)
+if not rp or not rp.Parent then return end
+dmg(targets(rp.Position,6),9999,0,rp.Position,true)
+end
+end)
 end
 local lastS=0
 local function slash()
@@ -843,7 +819,7 @@ end
 local function toggleBall()
 if ballActive then deactivateBall() else activateBall() end
 end
-local bB=mk("BALL",UDim2.new(0,105,1,-195),UDim2.new(0,85,0,85),Color3.fromRGB(150,0,200),Vector2.new(0,1))
+local bB=mk("BALL",UDim2.new(0,15,1,-355),UDim2.new(0,80,0,80),Color3.fromRGB(150,0,200),Vector2.new(0,1))
 press(bB,function()
 toggleBall()
 if ballActive then
