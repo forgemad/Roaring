@@ -247,10 +247,14 @@ local dashing=false
 local function dash()
 if dashing then return end
 dashing=true
+pcall(function()
 if dashT then
-pcall(function() dashT:Play(0.05) end)
-task.delay(0.4,function() if dashT then pcall(function() dashT:Stop(0.1) end) end end)
+dashT:Play(0.05)
+task.delay(0.4,function()
+if dashT then dashT:Stop(0.1) end
+end)
 end
+end)
 pcall(function() dTrail.Enabled=true end)
 pcall(function()
 local s=Instance.new("Sound")
@@ -259,7 +263,9 @@ s.Volume=0.8
 s.PlaybackSpeed=1.2
 s.Parent=rp
 s:Play()
-task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
+task.delay(2,function()
+if s and s.Parent then s.Parent=nil s:Destroy() end
+end)
 end)
 local fA1=Instance.new("Attachment")
 fA1.Position=Vector3.new(0,-1.5,0)
@@ -303,15 +309,19 @@ ColorSequenceKeypoint.new(1,Color3.fromRGB(150,0,0))
 fP.LightEmission=1
 fP.Parent=rp
 local d=dir()
-local bv=Instance.new("BodyVelocity")
-bv.MaxForce=Vector3.new(1e6,1e6,1e6)
-bv.P=1e5
-bv.Velocity=d*300
-bv.Parent=rp
-task.delay(0.25,function()
-pcall(function() bv:Destroy() end)
+local startPos=rp.Position
+local endPos=startPos+d*70
+local wasAnchored=rp.Anchored
+pcall(function() rp.Anchored=true end)
+local elapsed=0
+local duration=0.25
+local conn
+conn=RS.RenderStepped:Connect(function(dt)
+if not rp.Parent then
+if conn then conn:Disconnect() end
+pcall(function() rp.Anchored=wasAnchored end)
 pcall(function() dTrail.Enabled=false end)
-fP.Enabled=false
+pcall(function() fP.Enabled=false end)
 task.delay(0.6,function()
 pcall(function() fTrail:Destroy() end)
 pcall(function() fP:Destroy() end)
@@ -319,6 +329,26 @@ pcall(function() fA1:Destroy() end)
 pcall(function() fA2:Destroy() end)
 end)
 dashing=false
+return
+end
+elapsed=elapsed+dt
+local a=math.min(elapsed/duration,1)
+local e=1-(1-a)*(1-a)
+local np=startPos:Lerp(endPos,e)
+rp.CFrame=CFrame.new(np,np+d)
+if a>=1 then
+if conn then conn:Disconnect() end
+pcall(function() rp.Anchored=wasAnchored end)
+pcall(function() dTrail.Enabled=false end)
+pcall(function() fP.Enabled=false end)
+task.delay(0.6,function()
+pcall(function() fTrail:Destroy() end)
+pcall(function() fP:Destroy() end)
+pcall(function() fA1:Destroy() end)
+pcall(function() fA2:Destroy() end)
+end)
+dashing=false
+end
 end)
 task.spawn(function()
 for i=1,20 do
@@ -328,14 +358,15 @@ dmg(targets(rp.Position,6),9999,0,rp.Position,true)
 end
 end)
 end
-local lastS=0
 local function slash()
-if tick()-lastS<1.5 then return end
-lastS=tick()
+pcall(function()
 if slashT then
-pcall(function() slashT:Play(0.1) end)
-task.delay(0.6,function() if slashT then pcall(function() slashT:Stop(0.1) end) end end)
+slashT:Play(0.05)
+task.delay(0.6,function()
+if slashT then slashT:Stop(0.1) end
+end)
 end
+end)
 local d=dir()
 local o=rp.Position+d*8
 local c=o+d*20
@@ -388,7 +419,9 @@ s.Volume=1.2
 s.PlaybackSpeed=0.9
 s.Parent=rp
 s:Play()
-task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
+task.delay(2,function()
+if s and s.Parent then s.Parent=nil s:Destroy() end
+end)
 end)
 task.delay(0.25,function()
 pcall(function() beam.Transparency=0.6 end)
@@ -424,7 +457,9 @@ s.Volume=0.6
 s.PlaybackSpeed=1.5
 s.Parent=rp
 s:Play()
-task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
+task.delay(2,function()
+if s and s.Parent then s.Parent=nil s:Destroy() end
+end)
 end)
 for i=1,15 do
 task.spawn(function()
@@ -534,7 +569,9 @@ s.PlaybackSpeed=0.6
 s.Looped=true
 s.Parent=rp
 s:Play()
-task.delay(3,function() pcall(function() s.Parent=nil s:Destroy() end) end)
+task.delay(3,function()
+if s and s.Parent then s.Parent=nil s:Destroy() end
+end)
 end)
 cSp=Instance.new("Part")
 cSp.Shape=Enum.PartType.Ball
@@ -585,61 +622,12 @@ s.Volume=0.6
 s.PlaybackSpeed=0.7
 s.Parent=rp
 s:Play()
-task.delay(3,function() pcall(function() s.Parent=nil s:Destroy() end) end)
+task.delay(3,function()
+if s and s.Parent then s.Parent=nil s:Destroy() end
+end)
 end)
 dmg(targets(o,rr),9999,100,o,true)
 end
-press(bQ,function() dash() end)
-press(bE,function() slash() end)
-press(bR,function() crystal() end)
-press(bP,function()
-if pActive then
-rmPlat()
-bP.Text="PLATFORM"
-bP.BackgroundColor3=Color3.fromRGB(80,0,120)
-else
-if mkPlat() then
-bP.Text="STOP"
-bP.BackgroundColor3=Color3.fromRGB(150,0,0)
-end
-end
-end)
-bF.InputBegan:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then st() end
-end)
-bF.InputEnded:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then rl() end
-end)
-bD.InputBegan:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-if pActive then desc=true end
-end
-end)
-bD.InputEnded:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then desc=false end
-end)
-UIS.InputBegan:Connect(function(i,gp)
-if gp then return end
-if i.KeyCode==Enum.KeyCode.Q then dash()
-elseif i.KeyCode==Enum.KeyCode.E then slash()
-elseif i.KeyCode==Enum.KeyCode.R then crystal()
-elseif i.KeyCode==Enum.KeyCode.F then st()
-elseif i.KeyCode==Enum.KeyCode.G then
-if pActive then
-rmPlat()
-bP.Text="PLATFORM"
-bP.BackgroundColor3=Color3.fromRGB(80,0,120)
-else
-if mkPlat() then
-bP.Text="STOP"
-bP.BackgroundColor3=Color3.fromRGB(150,0,0)
-end
-end
-elseif i.KeyCode==Enum.KeyCode.H then loadAnims() end
-end)
-UIS.InputEnded:Connect(function(i)
-if i.KeyCode==Enum.KeyCode.F then rl() end
-end)
 local ballActive=false
 local ballPart=nil
 local ballConn=nil
@@ -659,25 +647,6 @@ if v:IsA("BasePart") or v:IsA("Decal") or v:IsA("Texture") then
 pcall(function() v.Transparency=0 end)
 end
 end
-end
-local function spawnGhost()
-local ghost=Instance.new("Part")
-ghost.Name="KnightGhost"
-ghost.Shape=Enum.PartType.Ball
-ghost.Size=Vector3.new(2.5,2.5,2.5)
-ghost.Material=Enum.Material.Neon
-ghost.Color=Color3.new(0,0,0)
-ghost.Transparency=0.4
-ghost.Anchored=true
-ghost.CanCollide=false
-ghost.CastShadow=false
-ghost.Parent=workspace
-ghost.CFrame=rp.CFrame
-T:Create(ghost,TweenInfo.new(0.6,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Transparency=1,Size=Vector3.new(0.5,0.5,0.5)}):Play()
-task.delay(0.7,function()
-pcall(function() ghost.Parent=nil end)
-pcall(function() ghost:Destroy() end)
-end)
 end
 local function activateBall()
 if ballActive then return end
@@ -709,52 +678,6 @@ weld.Part1=ballPart
 weld.C0=CFrame.new(0,0,0)
 weld.Parent=ballPart
 T:Create(ballPart,TweenInfo.new(0.4,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Size=Vector3.new(2.5,2.5,2.5)}):Play()
-pcall(function()
-local s=Instance.new("Sound")
-s.SoundId="rbxassetid://293168581"
-s.Volume=0.7
-s.PlaybackSpeed=1.3
-s.Parent=rp
-s:Play()
-task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
-end)
-local att=Instance.new("Attachment")
-att.Position=Vector3.new(0,1.5,0)
-att.Parent=ballPart
-local att2=Instance.new("Attachment")
-att2.Position=Vector3.new(0,-1.5,0)
-att2.Parent=ballPart
-local ballTrail=Instance.new("Trail")
-ballTrail.Attachment0=att
-ballTrail.Attachment1=att2
-ballTrail.Color=ColorSequence.new({
-ColorSequenceKeypoint.new(0,Color3.new(0,0,0)),
-ColorSequenceKeypoint.new(0.5,Color3.fromRGB(60,0,100)),
-ColorSequenceKeypoint.new(1,Color3.new(0,0,0))
-})
-ballTrail.Transparency=NumberSequence.new({
-NumberSequenceKeypoint.new(0,0.3),
-NumberSequenceKeypoint.new(1,1)
-})
-ballTrail.Lifetime=1
-ballTrail.LightEmission=0
-ballTrail.Parent=ballPart
-local ballPE=Instance.new("Attachment")
-ballPE.Parent=ballPart
-local ballP=Instance.new("ParticleEmitter")
-ballP.Texture="rbxassetid://6023564802"
-ballP.Rate=50
-ballP.Lifetime=NumberRange.new(0.3,0.6)
-ballP.Speed=NumberRange.new(2,6)
-ballP.SpreadAngle=Vector3.new(180,180,180)
-ballP.Size=NumberSequence.new({
-NumberSequenceKeypoint.new(0,0.6),
-NumberSequenceKeypoint.new(1,0)
-})
-ballP.Color=ColorSequence.new(Color3.fromRGB(200,100,255))
-ballP.LightEmission=1
-ballP.Parent=ballPE
-local ghostTimer=0
 local ballBV=Instance.new("BodyVelocity")
 ballBV.MaxForce=Vector3.new(1e6,1e6,1e6)
 ballBV.P=1e5
@@ -765,11 +688,6 @@ if not ballActive then return end
 if not ballPart or not ballPart.Parent then return end
 local t=tick()
 ballPart.CFrame=rp.CFrame*CFrame.Angles(t*10,t*7,t*5)
-ghostTimer=ghostTimer+dt
-if ghostTimer>=0.08 then
-ghostTimer=0
-spawnGhost()
-end
 local v=Vector3.new(0,0,0)
 if ballDescend then
 v=Vector3.new(0,-150,0)
@@ -786,40 +704,22 @@ ballDescend=false
 if ballConn then ballConn:Disconnect() ballConn=nil end
 if ballHideTask then pcall(function() task.cancel(ballHideTask) end) ballHideTask=nil end
 if ballPart then
-T:Create(ballPart,TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Size=Vector3.new(0.1,0.1,0.1),Transparency=1}):Play()
-local oldBall=ballPart
-task.delay(0.35,function()
-pcall(function() oldBall.Parent=nil end)
-pcall(function() oldBall:Destroy() end)
-end)
+ballPart.Parent=nil
+ballPart:Destroy()
 ballPart=nil
 end
 for _,v in pairs(rp:GetChildren()) do
 if v:IsA("BodyVelocity") then v:Destroy() end
 end
-for _,v in pairs(workspace:GetChildren()) do
-if v.Name=="KnightGhost" then
-pcall(function() v.Parent=nil end)
-pcall(function() v:Destroy() end)
-end
-end
-task.delay(0.15,function()
 showCharParts()
-end)
 hum.WalkSpeed=savedSpeed
-pcall(function()
-local s=Instance.new("Sound")
-s.SoundId="rbxassetid://293168581"
-s.Volume=0.5
-s.PlaybackSpeed=0.8
-s.Parent=rp
-s:Play()
-task.delay(2,function() pcall(function() s.Parent=nil s:Destroy() end) end)
-end)
 end
 local function toggleBall()
 if ballActive then deactivateBall() else activateBall() end
 end
+press(bQ,function() dash() end)
+press(bE,function() slash() end)
+press(bR,function() crystal() end)
 press(bB,function()
 toggleBall()
 if ballActive then
@@ -830,24 +730,55 @@ bB.Text="BALL"
 bB.BackgroundColor3=Color3.fromRGB(150,0,200)
 end
 end)
+press(bP,function()
+if pActive then
+rmPlat()
+bP.Text="PLATFORM"
+bP.BackgroundColor3=Color3.fromRGB(80,0,120)
+else
+if mkPlat() then
+bP.Text="STOP"
+bP.BackgroundColor3=Color3.fromRGB(150,0,0)
+end
+end
+end)
+bF.InputBegan:Connect(function(i)
+if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then st() end
+end)
+bF.InputEnded:Connect(function(i)
+if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then rl() end
+end)
 bD.InputBegan:Connect(function(i)
 if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
+if pActive then desc=true end
 if ballActive then ballDescend=true end
 end
 end)
 bD.InputEnded:Connect(function(i)
 if i.UserInputType==Enum.UserInputType.MouseButton1 or i.UserInputType==Enum.UserInputType.Touch then
-ballDescend=false
-end
-end)
-UIS.InputEnded:Connect(function(i)
-if i.UserInputType==Enum.UserInputType.Touch or i.UserInputType==Enum.UserInputType.MouseButton1 then
+desc=false
 ballDescend=false
 end
 end)
 UIS.InputBegan:Connect(function(i,gp)
 if gp then return end
-if i.KeyCode==Enum.KeyCode.B then
+if i.KeyCode==Enum.KeyCode.Q then dash()
+elseif i.KeyCode==Enum.KeyCode.E then slash()
+elseif i.KeyCode==Enum.KeyCode.R then crystal()
+elseif i.KeyCode==Enum.KeyCode.F then st()
+elseif i.KeyCode==Enum.KeyCode.G then
+if pActive then
+rmPlat()
+bP.Text="PLATFORM"
+bP.BackgroundColor3=Color3.fromRGB(80,0,120)
+else
+if mkPlat() then
+bP.Text="STOP"
+bP.BackgroundColor3=Color3.fromRGB(150,0,0)
+end
+end
+elseif i.KeyCode==Enum.KeyCode.H then loadAnims()
+elseif i.KeyCode==Enum.KeyCode.B then
 toggleBall()
 if ballActive then
 bB.Text="EXIT"
@@ -857,4 +788,7 @@ bB.Text="BALL"
 bB.BackgroundColor3=Color3.fromRGB(150,0,200)
 end
 end
+end)
+UIS.InputEnded:Connect(function(i)
+if i.KeyCode==Enum.KeyCode.F then rl() end
 end)
